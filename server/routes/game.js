@@ -77,12 +77,39 @@ router.post('/:session_id/team', (req, res) => {
   }
 });
 
+// POST /api/game/:session_id/init - Initialize game state
+router.post('/:session_id/init', (req, res) => {
+  try {
+    const session = sm.getSession(req.params.session_id);
+    if (!session) {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Session bulunamadi' } });
+    }
+
+    const teamSettings = typeof session.team_settings === 'string' ? JSON.parse(session.team_settings) : (session.team_settings || {});
+    const gameState = ge.initGameState(teamSettings);
+    sm.updateGameState(req.params.session_id, gameState);
+
+    res.json({ success: true, data: gameState });
+  } catch (e) {
+    res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: e.message } });
+  }
+});
+
 // POST /api/game/:session_id/draw - Draw card and assign to team
 router.post('/:session_id/draw', (req, res) => {
   try {
     const session = sm.getSession(req.params.session_id);
     if (!session) {
       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Session bulunamadi' } });
+    }
+
+    // Auto-init game if not started yet
+    let gameState;
+    try { gameState = JSON.parse(session.game_state || '{}'); } catch (_) { gameState = {}; }
+    if (!gameState.teams) {
+      const teamSettings = typeof session.team_settings === 'string' ? JSON.parse(session.team_settings) : (session.team_settings || {});
+      const initState = ge.initGameState(teamSettings);
+      sm.updateGameState(req.params.session_id, initState);
     }
 
     const { team_index, tier, username } = req.body;
