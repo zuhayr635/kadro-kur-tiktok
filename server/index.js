@@ -28,7 +28,7 @@ if (!process.env.JWT_SECRET) {
 
 const app = express();
 const server = http.createServer(app);
-const io = new SocketIO(server);
+const io = new SocketIO(server, { cors: { origin: '*' } });
 
 // Middleware
 app.use(helmet({ contentSecurityPolicy: false }));
@@ -60,17 +60,17 @@ app.use('/api/profile', profileRouter);
 const spaPages = ['game', 'panel', 'licensepanel', 'profile'];
 spaPages.forEach((page) => {
   app.get(`/${page}`, (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', `${page}.html`));
+    res.sendFile(path.join(__dirname, '..', 'public', page, 'index.html'));
   });
   app.get(`/${page}/*`, (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', `${page}.html`));
+    res.sendFile(path.join(__dirname, '..', 'public', page, 'index.html'));
   });
 });
 
 // Socket.io
 io.on('connection', (socket) => {
   socket.on('join-session', (sessionId) => {
-    socket.join(sessionId);
+    socket.join(`session_${sessionId}`);
   });
 });
 

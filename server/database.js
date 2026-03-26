@@ -32,7 +32,7 @@ function initDatabase() {
     CREATE TABLE IF NOT EXISTS licenses (
       id INTEGER PRIMARY KEY,
       license_key TEXT UNIQUE NOT NULL,
-      owner_name TEXT,
+      owner_name TEXT NOT NULL,
       owner_email TEXT,
       owner_tiktok TEXT,
       plan TEXT NOT NULL CHECK(plan IN ('basic','pro','premium','unlimited')),
