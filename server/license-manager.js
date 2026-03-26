@@ -12,6 +12,7 @@ function generateKey() {
 }
 
 function createLicense({ owner_name, plan = 'basic', owner_email, owner_tiktok, expires_at, notes }) {
+  if (!PLAN_MAX_SESSIONS[plan]) throw new Error(`Gecersiz plan: ${plan}`);
   const db = getDb();
   let key;
   do { key = generateKey(); } while (db.prepare('SELECT id FROM licenses WHERE license_key=?').get(key));
@@ -44,7 +45,7 @@ function updateLicense(id, fields) {
   const sets = keys.map(k => `${k}=?`);
   const vals = keys.map(k => fields[k]);
   getDb().prepare(`UPDATE licenses SET ${sets.join(',')}, updated_at=CURRENT_TIMESTAMP WHERE id=?`).run(...vals, id);
-  return getDb().prepare('SELECT * FROM licenses WHERE id=?').get(id);
+  return getDb().prepare('SELECT * FROM licenses WHERE id=?').get(id) || null;
 }
 
 function deleteLicense(id) {

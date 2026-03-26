@@ -2,9 +2,11 @@
 const router = require('express').Router();
 const lm = require('../license-manager');
 const { authMiddleware } = require('../auth');
+const { getDb } = require('../database');
 
 router.get('/', authMiddleware, (req, res) => {
-  res.json({ success: true, data: lm.getLicenses(req.query) });
+  const query = { ...req.query, limit: Math.min(Number(req.query.limit) || 50, 200) };
+  res.json({ success: true, data: lm.getLicenses(query) });
 });
 
 router.post('/', authMiddleware, (req, res) => {
@@ -14,46 +16,56 @@ router.post('/', authMiddleware, (req, res) => {
 });
 
 router.get('/:id', authMiddleware, (req, res) => {
-  const lic = require('../database').getDb().prepare('SELECT * FROM licenses WHERE id=?').get(req.params.id);
+  const lic = getDb().prepare('SELECT * FROM licenses WHERE id=?').get(req.params.id);
   if (!lic) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Lisans bulunamadi' } });
   res.json({ success: true, data: lic });
 });
 
 router.put('/:id', authMiddleware, (req, res) => {
   const lic = lm.updateLicense(Number(req.params.id), req.body);
+  if (!lic) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Lisans bulunamadi' } });
   res.json({ success: true, data: lic });
 });
 
 router.delete('/:id', authMiddleware, (req, res) => {
+  const exists = getDb().prepare('SELECT id FROM licenses WHERE id=?').get(req.params.id);
+  if (!exists) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Lisans bulunamadi' } });
   lm.deleteLicense(Number(req.params.id));
   res.json({ success: true, data: null });
 });
 
 router.post('/:id/suspend', authMiddleware, (req, res) => {
+  const exists = getDb().prepare('SELECT id FROM licenses WHERE id=?').get(req.params.id);
+  if (!exists) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Lisans bulunamadi' } });
   const lic = lm.updateLicense(Number(req.params.id), { status: 'suspended' });
   lm.logAction(Number(req.params.id), 'suspended', null, req.ip);
   res.json({ success: true, data: lic });
 });
 
 router.post('/:id/activate', authMiddleware, (req, res) => {
+  const exists = getDb().prepare('SELECT id FROM licenses WHERE id=?').get(req.params.id);
+  if (!exists) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Lisans bulunamadi' } });
   const lic = lm.updateLicense(Number(req.params.id), { status: 'active' });
   lm.logAction(Number(req.params.id), 'activated', null, req.ip);
   res.json({ success: true, data: lic });
 });
 
 router.post('/:id/extend', authMiddleware, (req, res) => {
-  const { days } = req.body;
-  const db = require('../database').getDb();
-  const lic = db.prepare('SELECT * FROM licenses WHERE id=?').get(req.params.id);
+  const days = Number(req.body.days);
+  if (!days || days < 1 || !Number.isInteger(days)) {
+    return res.status(400).json({ success: false, error: { code: 'INVALID_DAYS', message: 'days pozitif tam sayi olmali' } });
+  }
+  const lic = getDb().prepare('SELECT * FROM licenses WHERE id=?').get(req.params.id);
+  if (!lic) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Lisans bulunamadi' } });
   const current = lic.expires_at ? new Date(lic.expires_at) : new Date();
-  current.setDate(current.getDate() + Number(days));
+  current.setDate(current.getDate() + days);
   const updated = lm.updateLicense(Number(req.params.id), { expires_at: current.toISOString() });
   lm.logAction(Number(req.params.id), 'extended', `${days} gun`, req.ip);
   res.json({ success: true, data: updated });
 });
 
 router.get('/:id/logs', authMiddleware, (req, res) => {
-  const logs = require('../database').getDb()
+  const logs = getDb()
     .prepare('SELECT * FROM license_logs WHERE license_id=? ORDER BY created_at DESC LIMIT 100').all(req.params.id);
   res.json({ success: true, data: logs });
 });

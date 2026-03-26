@@ -3,7 +3,7 @@ function app() {
   return {
     token: localStorage.getItem('admin_token'),
     tab: 'dashboard',
-    loginForm: { username: 'admin', password: '' },
+    loginForm: { username: '', password: '' },
     loginError: '',
     loginLoading: false,
     dashboard: {},

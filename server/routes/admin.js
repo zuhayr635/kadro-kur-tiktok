@@ -13,7 +13,7 @@ async function ensureAdmin() {
   if (!exists) {
     const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 12);
     db.prepare('INSERT INTO admin (username, password_hash) VALUES (?,?)').run('admin', hash);
-    console.log('Varsayilan admin olusturuldu: admin / ' + (process.env.ADMIN_PASSWORD || 'admin123'));
+    console.log('Varsayilan admin olusturuldu. Giris bilgileri icin .env dosyasina bakin.');
   }
 }
 ensureAdmin().catch(console.error);
@@ -43,6 +43,7 @@ router.get('/dashboard', authMiddleware, (req, res) => {
 router.post('/change-password', authMiddleware, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   const admin = getDb().prepare('SELECT * FROM admin WHERE id=?').get(req.admin.sub);
+  if (!admin) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Admin bulunamadi' } });
   if (!(await comparePassword(currentPassword, admin.password_hash))) {
     return res.status(400).json({ success: false, error: { code: 'WRONG_PASSWORD', message: 'Mevcut sifre yanlis' } });
   }
@@ -59,8 +60,12 @@ router.get('/settings', authMiddleware, (req, res) => {
 });
 
 router.put('/settings/:key', authMiddleware, (req, res) => {
+  const ALLOWED_KEYS = ['game_layout','like_threshold','max_concurrent_sessions','session_timeout_minutes','log_retention_days','ws_port_start','ws_port_end'];
   const { key } = req.params;
   const { value } = req.body;
+  if (!ALLOWED_KEYS.includes(key)) {
+    return res.status(400).json({ success: false, error: { code: 'INVALID_KEY', message: 'Gecersiz ayar anahtari' } });
+  }
   getDb().prepare('INSERT OR REPLACE INTO system_settings (key, value, updated_at) VALUES (?,?,CURRENT_TIMESTAMP)').run(key, String(value));
   res.json({ success: true, data: { key, value } });
 });
@@ -74,6 +79,9 @@ router.get('/sounds', authMiddleware, (req, res) => {
 router.put('/sounds/:key', authMiddleware, (req, res) => {
   const { key } = req.params;
   const { mode } = req.body;
+  if (!['synth', 'custom'].includes(mode)) {
+    return res.status(400).json({ success: false, error: { code: 'INVALID_MODE', message: 'Mode synth veya custom olmali' } });
+  }
   getDb().prepare('UPDATE sound_settings SET mode=?, updated_at=CURRENT_TIMESTAMP WHERE sound_key=?').run(mode, key);
   res.json({ success: true, data: { sound_key: key, mode } });
 });
