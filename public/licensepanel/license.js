@@ -20,7 +20,7 @@ function app() {
     showPlayerModal: false,
     playerEdit: null,
     playerForm: { name: '', position: 'ST', overall: 75, club: '', league: '', nationality: '' },
-    playerFilter: { tier: '', position: '' },
+    playerFilter: { tier: '', position: '', league: '' },
 
     async init() {
       if (this.token) {
@@ -127,6 +127,7 @@ function app() {
       const params = new URLSearchParams();
       if (this.playerFilter.tier) params.set('tier', this.playerFilter.tier);
       if (this.playerFilter.position) params.set('position', this.playerFilter.position);
+      if (this.playerFilter.league) params.set('league', this.playerFilter.league);
       const data = await this.api('GET', `/api/admin/players?${params}`);
       if (data?.success) this.players = data.data;
     },

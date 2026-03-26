@@ -148,6 +148,7 @@
             <option>CDM</option><option>CM</option><option>CAM</option>
             <option>LW</option><option>RW</option><option>CF</option><option>ST</option>
           </select>
+          <input x-model="playerFilter.league" @input.debounce="loadPlayers()" placeholder="Lig filtrele..." style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;">
         </div>
         <div class="table-wrap">
           <table>
