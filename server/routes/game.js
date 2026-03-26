@@ -90,29 +90,12 @@ router.post('/:session_id/draw', (req, res) => {
       return res.status(400).json({ success: false, error: { code: 'MISSING_FIELDS', message: 'team_index ve tier zorunludur' } });
     }
 
-    const card = ge.drawCard(session, tier, team_index);
-    if (!card) {
+    const result = ge.drawCard(req.params.session_id, team_index, tier);
+    if (!result) {
       return res.status(404).json({ success: false, error: { code: 'NO_CARD', message: 'Uygun oyuncu bulunamadi' } });
     }
 
-    // Save to used_players
-    getDb().prepare(
-      'INSERT INTO used_players (session_id, player_id, team_index, position) VALUES (?,?,?,?)'
-    ).run(session.id, card.player_id, team_index, card.position || null);
-
-    // Update game state
-    const gameState = typeof session.game_state === 'string' ? JSON.parse(session.game_state) : (session.game_state || {});
-    if (!gameState.cards) gameState.cards = [];
-    gameState.cards.push({
-      player_id: card.player_id,
-      team_index,
-      tier,
-      username: username || null,
-      drawn_at: new Date().toISOString()
-    });
-    sm.updateGameState(req.params.session_id, gameState);
-
-    res.json({ success: true, data: card });
+    res.json({ success: true, data: result });
   } catch (e) {
     res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: e.message } });
   }
@@ -126,12 +109,12 @@ router.post('/:session_id/undo', (req, res) => {
       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Session bulunamadi' } });
     }
 
-    const result = ge.undoLastAction(session);
-    if (!result) {
+    const undone = ge.undoLastAction(req.params.session_id);
+    if (!undone) {
       return res.status(400).json({ success: false, error: { code: 'NOTHING_TO_UNDO', message: 'Geri alinacak islem yok' } });
     }
 
-    res.json({ success: true, data: result });
+    res.json({ success: true, data: undone });
   } catch (e) {
     res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: e.message } });
   }
@@ -145,35 +128,9 @@ router.post('/:session_id/end', (req, res) => {
       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Session bulunamadi' } });
     }
 
-    const result = ge.endGame(session);
+    const result = ge.endGame(req.params.session_id);
 
-    // Calculate duration
-    const startedAt = new Date(session.started_at);
-    const durationSeconds = Math.round((Date.now() - startedAt.getTime()) / 1000);
-
-    // Count cards and participants
-    const usedPlayers = getDb().prepare('SELECT COUNT(*) as c FROM used_players WHERE session_id=?').get(session.id);
-    const participants = getDb().prepare('SELECT COUNT(DISTINCT team_index) as c FROM used_players WHERE session_id=?').get(session.id);
-
-    // Save to game_history
-    getDb().prepare(`
-      INSERT INTO game_history (session_id, license_id, tiktok_username, final_scores, statistics, duration_seconds, total_cards_opened, total_participants)
-      VALUES (?,?,?,?,?,?,?,?)
-    `).run(
-      session.id,
-      session.license_id,
-      session.tiktok_username,
-      JSON.stringify(result.final_scores || {}),
-      JSON.stringify(result.statistics || {}),
-      durationSeconds,
-      usedPlayers.c,
-      participants.c
-    );
-
-    // Stop the session
-    sm.stopSession(req.params.session_id);
-
-    res.json({ success: true, data: { message: 'Oyun bitti', ...result, duration_seconds: durationSeconds } });
+    res.json({ success: true, data: { message: 'Oyun bitti', ...result } });
   } catch (e) {
     res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: e.message } });
   }

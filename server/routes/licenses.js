@@ -28,10 +28,19 @@ router.put('/:id', authMiddleware, (req, res) => {
 });
 
 router.delete('/:id', authMiddleware, (req, res) => {
-  const exists = getDb().prepare('SELECT id FROM licenses WHERE id=?').get(req.params.id);
-  if (!exists) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Lisans bulunamadi' } });
-  lm.deleteLicense(Number(req.params.id));
-  res.json({ success: true, data: null });
+  try {
+    const exists = getDb().prepare('SELECT id FROM licenses WHERE id=?').get(req.params.id);
+    if (!exists) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Lisans bulunamadi' } });
+    // Iliskili kayitlari temizle
+    const db = getDb();
+    db.prepare('DELETE FROM license_logs WHERE license_id=?').run(req.params.id);
+    db.prepare('DELETE FROM game_history WHERE license_id=?').run(req.params.id);
+    db.prepare('DELETE FROM sessions WHERE license_id=?').run(req.params.id);
+    lm.deleteLicense(Number(req.params.id));
+    res.json({ success: true, data: null });
+  } catch (e) {
+    res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: e.message } });
+  }
 });
 
 router.post('/:id/suspend', authMiddleware, (req, res) => {
