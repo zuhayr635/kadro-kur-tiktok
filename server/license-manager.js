@@ -8,7 +8,7 @@ function generateKey() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const seg = () => Array.from({ length: 4 }, () =>
     chars[Math.floor(Math.random() * chars.length)]).join('');
-  return `HIRA-${seg()}-${seg()}-${seg()}`;
+  return `KK-${seg()}-${seg()}-${seg()}`;
 }
 
 function createLicense({ owner_name, plan = 'basic', owner_email, owner_tiktok, expires_at, notes }) {

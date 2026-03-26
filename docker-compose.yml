@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  kadro-kur:
+    build: .
+    container_name: kadro-kur-tiktok
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - app-data:/app/data
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - JWT_SECRET=${JWT_SECRET:-change-this-to-random-secret}
+      - PORT=3000
+      - DB_PATH=/app/data/db/kadro.db
+
+volumes:
+  app-data:
+    driver: local

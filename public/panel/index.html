@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kadro Kur - Yayin Paneli</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ==================== LICENSE LOGIN ==================== -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <h1>KADRO KUR</h1>
+        <p class="login-subtitle">Yayin Paneli</p>
+      </div>
+      <div class="login-form">
+        <label for="license-input">Lisans Anahtari</label>
+        <input
+          type="text"
+          id="license-input"
+          placeholder="HIRA-XXXX-XXXX-XXXX"
+          maxlength="19"
+          spellcheck="false"
+          autocomplete="off"
+        />
+        <div id="login-error" class="login-error" style="display:none;"></div>
+        <button id="login-btn" class="btn btn-primary btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Giris Yap
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN PANEL ==================== -->
+  <div id="main-panel" class="main-panel" style="display:none;">
+
+    <!-- TOP BAR -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <span class="top-bar-title">KADRO KUR</span>
+      </div>
+      <div class="top-bar-center">
+        <label class="obs-label">OBS URL:</label>
+        <code id="obs-url" class="obs-url">--</code>
+        <button id="copy-obs-btn" class="btn btn-sm btn-ghost" title="Kopyala">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div class="top-bar-right">
+        <span id="session-status" class="status-badge status-offline">
+          <span class="status-dot"></span>
+          <span id="session-status-text">Baglanti yok</span>
+        </span>
+      </div>
+    </header>
+
+    <!-- TAB NAVIGATION -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="tab-teams">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Takim Ayarlari
+      </button>
+      <button class="tab-btn" data-tab="tab-settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1.08 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1.08z"/></svg>
+        Oyun Ayarlari
+      </button>
+      <button class="tab-btn" data-tab="tab-cards">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M12 6v12"/><path d="M6 12h12"/></svg>
+        Kart Dagitimi
+      </button>
+      <button class="tab-btn" data-tab="tab-score">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 22V2h4v20"/></svg>
+        Skor &amp; Final
+      </button>
+      <button class="tab-btn" data-tab="tab-profile">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profil
+      </button>
+    </nav>
+
+    <!-- ========== TAB CONTENT ========== -->
+    <div class="tab-content-wrapper">
+
+      <!-- TAB 1 - TAKIM AYARLARI -->
+      <div id="tab-teams" class="tab-content active">
+        <div class="section-header">
+          <h2>Takim Ayarlari</h2>
+          <div class="section-actions">
+            <button id="preview-teams-btn" class="btn btn-ghost">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Onizle
+            </button>
+            <button id="save-teams-btn" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Kaydet
+            </button>
+          </div>
+        </div>
+        <div class="teams-grid" id="teams-grid">
+          <!-- Team cards are generated by JS -->
+        </div>
+      </div>
+
+      <!-- TAB 2 - OYUN AYARLARI -->
+      <div id="tab-settings" class="tab-content">
+        <div class="section-header"><h2>Oyun Ayarlari</h2></div>
+
+        <div class="settings-grid">
+          <!-- TikTok Connection -->
+          <div class="settings-card">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l6-6"/><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/><path d="M15 9v6"/></svg>
+              TikTok Baglantisi
+            </h3>
+            <div class="input-row">
+              <input type="text" id="tiktok-username" placeholder="@kullaniciadi" spellcheck="false" />
+              <button id="tiktok-connect-btn" class="btn btn-primary">Baglan</button>
+              <button id="tiktok-disconnect-btn" class="btn btn-danger" style="display:none;">Kes</button>
+            </div>
+            <div class="connection-status" id="tiktok-status">
+              <span class="status-dot-sm status-dot-red"></span>
+              <span id="tiktok-status-text">Bagli degil</span>
+            </div>
+          </div>
+
+          <!-- Like Threshold -->
+          <div class="settings-card">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              Begeni Esigi
+            </h3>
+            <div class="input-row">
+              <label>Kart icin gereken begeni sayisi:</label>
+              <input type="number" id="like-threshold" value="50" min="1" max="10000" />
+            </div>
+          </div>
+
+          <!-- Tier OVR Ranges -->
+          <div class="settings-card">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Tier OVR Araliklari
+            </h3>
+            <div class="tier-ranges">
+              <div class="tier-row tier-bronze">
+                <span class="tier-label">Bronz</span>
+                <input type="number" id="tier1-min" value="60" min="1" max="99" />
+                <span class="tier-sep">-</span>
+                <input type="number" id="tier1-max" value="69" min="1" max="99" />
+              </div>
+              <div class="tier-row tier-silver">
+                <span class="tier-label">Gumus</span>
+                <input type="number" id="tier2-min" value="70" min="1" max="99" />
+                <span class="tier-sep">-</span>
+                <input type="number" id="tier2-max" value="79" min="1" max="99" />
+              </div>
+              <div class="tier-row tier-gold">
+                <span class="tier-label">Altin</span>
+                <input type="number" id="tier3-min" value="80" min="1" max="99" />
+                <span class="tier-sep">-</span>
+                <input type="number" id="tier3-max" value="89" min="1" max="99" />
+              </div>
+              <div class="tier-row tier-diamond">
+                <span class="tier-label">Elmas</span>
+                <input type="number" id="tier4-min" value="90" min="1" max="99" />
+                <span class="tier-sep">-</span>
+                <input type="number" id="tier4-max" value="99" min="1" max="99" />
+              </div>
+            </div>
+          </div>
+
+          <!-- League Checkboxes -->
+          <div class="settings-card">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e94560" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              Ligler
+            </h3>
+            <div class="league-checkboxes">
+              <label class="checkbox-item"><input type="checkbox" value="super-lig" checked /><span>Super Lig</span></label>
+              <label class="checkbox-item"><input type="checkbox" value="premier-league" checked /><span>Premier League</span></label>
+              <label class="checkbox-item"><input type="checkbox" value="la-liga" checked /><span>La Liga</span></label>
+              <label class="checkbox-item"><input type="checkbox" value="serie-a" checked /><span>Serie A</span></label>
+              <label class="checkbox-item"><input type="checkbox" value="bundesliga" checked /><span>Bundesliga</span></label>
+              <label class="checkbox-item"><input type="checkbox" value="ligue-1" checked /><span>Ligue 1</span></label>
+            </div>
+            <div class="card-count-display">
+              Toplam kart:&nbsp;<strong id="total-cards-count">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-footer">
+          <button id="save-settings-btn" class="btn btn-primary btn-lg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Ayarlari Kaydet
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 3 - KART DAGITIMI -->
+      <div id="tab-cards" class="tab-content">
+        <div class="section-header">
+          <h2>Kart Dagitimi</h2>
+          <div class="section-actions">
+            <span class="remaining-cards">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M12 6v12"/></svg>
+              Kalan: <strong id="remaining-count">0</strong>
+            </span>
+          </div>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="game-controls">
+          <button id="game-start-btn" class="btn btn-success btn-lg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Baslat
+          </button>
+          <button id="game-pause-btn" class="btn btn-warning btn-lg" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            Duraklat
+          </button>
+          <button id="game-end-btn" class="btn btn-danger btn-lg" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+            Bitir
+          </button>
+        </div>
+
+        <div class="cards-layout">
+          <!-- Pending Requests Queue -->
+          <div class="queue-panel">
+            <h3>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              Bekleyen Istekler
+            </h3>
+            <div id="request-queue" class="request-queue">
+              <div class="queue-empty">Henuz istek yok</div>
+            </div>
+          </div>
+
+          <!-- Team Assign Buttons -->
+          <div class="assign-panel">
+            <h3>Takima Ata</h3>
+            <div id="team-buttons" class="team-buttons">
+              <!-- Generated by JS -->
+            </div>
+            <button id="undo-btn" class="btn btn-ghost btn-sm" style="margin-top:12px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              Son Islemi Geri Al
+            </button>
+          </div>
+
+          <!-- Card Result Popup -->
+          <div id="card-result-popup" class="card-result-popup" style="display:none;">
+            <div class="popup-inner">
+              <div id="popup-icon" class="popup-icon"></div>
+              <div id="popup-title" class="popup-title"></div>
+              <div id="popup-detail" class="popup-detail"></div>
+              <button id="popup-close" class="btn btn-ghost btn-sm">Kapat</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini Formation Views -->
+        <div class="formations-row" id="formations-row">
+          <!-- Generated by JS -->
+        </div>
+
+        <!-- Action Log -->
+        <div class="action-log-section">
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Islem Kaydi
+          </h3>
+          <div id="action-log" class="action-log">
+            <div class="log-empty">Henuz islem yok</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4 - SKOR & FINAL -->
+      <div id="tab-score" class="tab-content">
+        <div class="section-header"><h2>Skor &amp; Final</h2></div>
+
+        <div class="score-section">
+          <button id="end-game-final-btn" class="btn btn-danger btn-lg" style="margin-bottom:24px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64A9 9 0 0 1 20.77 15"/><path d="M6.16 6.16a9 9 0 1 0 12.68 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+            Oyunu Bitir
+          </button>
+
+          <!-- Score Table -->
+          <div class="score-table-wrap">
+            <table class="score-table" id="score-table">
+              <thead>
+                <tr>
+                  <th>Sira</th>
+                  <th>Takim</th>
+                  <th>Toplam OVR</th>
+                  <th>Ort OVR</th>
+                  <th>Oyuncu</th>
+                </tr>
+              </thead>
+              <tbody id="score-tbody">
+                <tr><td colspan="5" class="empty-row">Oyun bitmedi</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Statistics Summary -->
+          <div class="stats-summary" id="stats-summary">
+            <div class="stat-box">
+              <span class="stat-value" id="stat-total-cards">0</span>
+              <span class="stat-label">Toplam Kart</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="stat-total-likes">0</span>
+              <span class="stat-label">Toplam Begeni</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="stat-total-viewers">0</span>
+              <span class="stat-label">Katilimci</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="stat-best-ovr">--</span>
+              <span class="stat-label">En Iyi OVR</span>
+            </div>
+          </div>
+
+          <!-- Final Actions -->
+          <div class="final-actions">
+            <button id="save-profile-btn" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Profile Kaydet
+            </button>
+            <button id="screenshot-btn" class="btn btn-ghost">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Ekran Goruntusu Indir
+            </button>
+            <button id="new-game-btn" class="btn btn-success">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Yeni Oyun Baslat
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5 - PROFIL -->
+      <div id="tab-profile" class="tab-content">
+        <div class="section-header"><h2>Profil</h2></div>
+
+        <div class="profile-section">
+          <!-- Total Stats -->
+          <div class="profile-stats" id="profile-stats">
+            <div class="stat-box">
+              <span class="stat-value" id="profile-total-games">0</span>
+              <span class="stat-label">Toplam Oyun</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="profile-total-cards">0</span>
+              <span class="stat-label">Toplam Kart</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="profile-total-likes">0</span>
+              <span class="stat-label">Toplam Begeni</span>
+            </div>
+          </div>
+
+          <!-- Past Games List -->
+          <h3>Gecmis Oyunlar</h3>
+          <div id="past-games-list" class="past-games-list">
+            <div class="queue-empty">Henuz oyun kaydedilmedi</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- / tab-content-wrapper -->
+  </div><!-- / main-panel -->
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="panel.js"></script>
+</body>
+</html>

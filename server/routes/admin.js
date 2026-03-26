@@ -6,7 +6,7 @@ const { signToken, hashPassword, comparePassword, authMiddleware } = require('..
 const lm = require('../license-manager');
 const pm = require('../player-manager');
 
-// Ilk admin olustur (sunucu basinda cagrılır)
+// Ilk admin olustur (index.js'den DB init sonrasi cagirilir)
 async function ensureAdmin() {
   const db = getDb();
   const exists = db.prepare('SELECT id FROM admin WHERE username=?').get('admin');
@@ -16,7 +16,6 @@ async function ensureAdmin() {
     console.log('Varsayilan admin olusturuldu. Giris bilgileri icin .env dosyasina bakin.');
   }
 }
-ensureAdmin().catch(console.error);
 
 // POST /api/admin/login
 router.post('/login', async (req, res) => {
@@ -118,4 +117,5 @@ router.delete('/players/:id', authMiddleware, (req, res) => {
   res.json({ success: true, data: null });
 });
 
+router.ensureAdmin = ensureAdmin;
 module.exports = router;
