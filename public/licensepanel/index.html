@@ -3,78 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KADRO KUR — Admin Panel</title>
+  <title>KADRO KUR — Yonetim Paneli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body x-data="app()" x-init="init()">
 
-  <!-- Login -->
+  <!-- Giris Ekrani -->
   <div id="login-screen" x-show="!token" x-cloak>
     <div class="login-box">
       <h1>KADRO KUR</h1>
-      <h2>Admin Paneli</h2>
+      <h2>Yonetim Paneli</h2>
       <form @submit.prevent="login()">
         <input x-model="loginForm.username" type="text" placeholder="Kullanici adi" required>
         <input x-model="loginForm.password" type="password" placeholder="Sifre" required>
         <p class="error" x-show="loginError" x-text="loginError"></p>
         <button type="submit" :disabled="loginLoading">
           <span x-show="!loginLoading">Giris Yap</span>
-          <span x-show="loginLoading">Giriliyor...</span>
+          <span x-show="loginLoading">Giris yapiliyor...</span>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- Main App -->
+  <!-- Ana Uygulama -->
   <div id="app" x-show="token" x-cloak>
-    <!-- Sidebar -->
+    <!-- Kenar Cubugu -->
     <nav class="sidebar">
-      <div class="logo">KADRO KUR</div>
+      <div class="logo-area">
+        <div class="logo">KADRO KUR</div>
+        <div class="logo-sub">Yonetim Paneli</div>
+      </div>
       <ul>
         <li :class="{ active: tab === 'dashboard' }" @click="tab = 'dashboard'; loadDashboard()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-          Dashboard
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Genel Bakis
         </li>
         <li :class="{ active: tab === 'licenses' }" @click="tab = 'licenses'; loadLicenses()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
           Lisanslar
         </li>
         <li :class="{ active: tab === 'players' }" @click="tab = 'players'; loadPlayers()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Oyuncular
         </li>
         <li :class="{ active: tab === 'sounds' }" @click="tab = 'sounds'; loadSounds()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
           Ses Ayarlari
         </li>
         <li :class="{ active: tab === 'settings' }" @click="tab = 'settings'; loadSettings()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Sistem Ayarlari
         </li>
       </ul>
+      <div class="sidebar-footer">
+        <a href="https://t.me/luanamobile" target="_blank" class="contact-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          Telegram: @luanamobile
+        </a>
+      </div>
       <button class="logout-btn" @click="logout()">Cikis Yap</button>
     </nav>
 
-    <!-- Content -->
+    <!-- Icerik -->
     <main class="content">
 
-      <!-- Dashboard -->
+      <!-- Genel Bakis -->
       <div x-show="tab === 'dashboard'">
-        <h2>Dashboard</h2>
+        <h2>Genel Bakis</h2>
         <div class="stats-grid">
           <div class="stat-card">
+            <div class="stat-icon">🔑</div>
             <div class="stat-value" x-text="dashboard.totalLicenses ?? '—'"></div>
             <div class="stat-label">Toplam Lisans</div>
           </div>
           <div class="stat-card">
+            <div class="stat-icon">✅</div>
             <div class="stat-value" x-text="dashboard.activeLicenses ?? '—'"></div>
             <div class="stat-label">Aktif Lisans</div>
           </div>
           <div class="stat-card">
+            <div class="stat-icon">📡</div>
             <div class="stat-value" x-text="dashboard.activeSessions ?? '—'"></div>
-            <div class="stat-label">Aktif Session</div>
+            <div class="stat-label">Canli Yayin</div>
           </div>
           <div class="stat-card">
+            <div class="stat-icon">⚽</div>
             <div class="stat-value" x-text="dashboard.totalPlayers ?? '—'"></div>
             <div class="stat-label">Oyuncu Sayisi</div>
           </div>
@@ -84,7 +99,7 @@
       <!-- Lisanslar -->
       <div x-show="tab === 'licenses'">
         <div class="section-header">
-          <h2>Lisanslar</h2>
+          <h2>Lisans Yonetimi</h2>
           <button class="btn-primary" @click="openLicenseModal()">+ Yeni Lisans</button>
         </div>
         <div class="table-wrap">
@@ -95,7 +110,7 @@
                 <th>Sahip</th>
                 <th>Plan</th>
                 <th>Durum</th>
-                <th>Son Kullanim</th>
+                <th>Bitis Tarihi</th>
                 <th>Islemler</th>
               </tr>
             </thead>
@@ -111,10 +126,10 @@
                     <button class="btn-icon" @click="editLicense(lic)" title="Duzenle">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
-                    <button class="btn-icon" @click="extendLicense(lic)" title="Uzat">
+                    <button class="btn-icon" @click="extendLicense(lic)" title="Sure Uzat">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     </button>
-                    <button class="btn-icon" @click="toggleLicenseStatus(lic)" :title="lic.status === 'active' ? 'Askiya Al' : 'Aktifle'">
+                    <button class="btn-icon" @click="toggleLicenseStatus(lic)" :title="lic.status === 'active' ? 'Askiya Al' : 'Aktif Yap'">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
                     </button>
                     <button class="btn-icon btn-danger" @click="deleteLicenseConfirm(lic)" title="Sil">
@@ -131,29 +146,30 @@
       <!-- Oyuncular -->
       <div x-show="tab === 'players'">
         <div class="section-header">
-          <h2>Oyuncular</h2>
+          <h2>Oyuncu Yonetimi</h2>
           <button class="btn-primary" @click="openPlayerModal()">+ Yeni Oyuncu</button>
         </div>
         <div class="filters">
           <select x-model="playerFilter.tier" @change="loadPlayers()">
-            <option value="">Tum Tierlar</option>
-            <option value="bronze">Bronze</option>
-            <option value="silver">Silver</option>
-            <option value="gold">Gold</option>
-            <option value="elite">Elite</option>
+            <option value="">Tum Seviyeler</option>
+            <option value="bronze">Bronz</option>
+            <option value="silver">Gumus</option>
+            <option value="gold">Altin</option>
+            <option value="elite">Elit</option>
           </select>
           <select x-model="playerFilter.position" @change="loadPlayers()">
             <option value="">Tum Pozisyonlar</option>
             <option>GK</option><option>CB</option><option>LB</option><option>RB</option>
             <option>CDM</option><option>CM</option><option>CAM</option>
+            <option>LM</option><option>RM</option>
             <option>LW</option><option>RW</option><option>CF</option><option>ST</option>
           </select>
-          <input x-model="playerFilter.league" @input.debounce="loadPlayers()" placeholder="Lig filtrele..." style="padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;">
+          <input x-model="playerFilter.league" @input.debounce="loadPlayers()" placeholder="Lig ara...">
         </div>
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Ad</th><th>Pozisyon</th><th>Kulup</th><th>Overall</th><th>Tier</th><th>Islemler</th></tr>
+              <tr><th>Isim</th><th>Pozisyon</th><th>Kulup</th><th>Genel</th><th>Seviye</th><th>Islemler</th></tr>
             </thead>
             <tbody>
               <template x-for="p in players" :key="p.id">
@@ -161,13 +177,13 @@
                   <td x-text="p.name"></td>
                   <td x-text="p.position"></td>
                   <td x-text="p.club || '—'"></td>
-                  <td x-text="p.overall"></td>
+                  <td><strong x-text="p.overall"></strong></td>
                   <td><span class="badge" :class="'badge-tier-' + p.tier" x-text="p.tier"></span></td>
                   <td class="actions">
-                    <button class="btn-icon" @click="editPlayer(p)">
+                    <button class="btn-icon" @click="editPlayer(p)" title="Duzenle">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
-                    <button class="btn-icon btn-danger" @click="deletePlayerConfirm(p)">
+                    <button class="btn-icon btn-danger" @click="deletePlayerConfirm(p)" title="Sil">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                     </button>
                   </td>
@@ -180,14 +196,24 @@
 
       <!-- Ses Ayarlari -->
       <div x-show="tab === 'sounds'">
-        <h2>Ses Ayarlari</h2>
+        <h2>Ses Efekt Ayarlari</h2>
+        <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px;">Her ses efekti icin otomatik sentez veya ozel ses dosyasi secebilirsiniz.</p>
         <div class="sound-list">
           <template x-for="s in sounds" :key="s.id">
             <div class="sound-item">
-              <span class="sound-key" x-text="s.sound_key"></span>
-              <div class="sound-toggle">
-                <button :class="{ active: s.mode === 'synth' }" @click="setSoundMode(s, 'synth')">Synth</button>
-                <button :class="{ active: s.mode === 'custom' }" @click="setSoundMode(s, 'custom')">Ozel</button>
+              <div class="sound-header">
+                <div>
+                  <div class="sound-key" x-text="soundLabels[s.sound_key] || s.sound_key"></div>
+                  <div class="sound-label" x-text="s.sound_key"></div>
+                </div>
+                <div class="sound-toggle">
+                  <button :class="{ active: s.mode === 'synth' }" @click="setSoundMode(s, 'synth')">Otomatik</button>
+                  <button :class="{ active: s.mode === 'custom' }" @click="setSoundMode(s, 'custom')">Ozel Ses</button>
+                </div>
+              </div>
+              <div class="sound-upload" x-show="s.mode === 'custom'" x-transition>
+                <p>MP3 veya WAV dosyasi yukleyin</p>
+                <input type="file" accept="audio/*" @change="uploadSound(s, $event)">
               </div>
             </div>
           </template>
@@ -197,10 +223,12 @@
       <!-- Sistem Ayarlari -->
       <div x-show="tab === 'settings'">
         <h2>Sistem Ayarlari</h2>
-        <div class="settings-form">
+        <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px;">Genel sistem yapilandirma ayarlari</p>
+        <div class="settings-list">
           <template x-for="(value, key) in settings" :key="key">
-            <div class="setting-row">
-              <label x-text="key"></label>
+            <div class="setting-card">
+              <label x-text="settingLabels[key]?.title || key"></label>
+              <div class="setting-desc" x-text="settingLabels[key]?.desc || ''"></div>
               <input type="text" :value="value" @change="saveSetting(key, $event.target.value)">
             </div>
           </template>
@@ -213,38 +241,48 @@
   <!-- Modal: Lisans Olustur/Duzenle -->
   <div class="modal-backdrop" x-show="showLicenseModal" x-cloak @click.self="showLicenseModal = false">
     <div class="modal">
-      <h3 x-text="licenseEdit ? 'Lisansi Duzenle' : 'Yeni Lisans'"></h3>
+      <h3 x-text="licenseEdit ? 'Lisansi Duzenle' : 'Yeni Lisans Olustur'"></h3>
       <form @submit.prevent="saveLicense()">
         <label>Sahip Adi *</label>
-        <input x-model="licenseForm.owner_name" required>
+        <input x-model="licenseForm.owner_name" required placeholder="Ornek: Ali Yilmaz">
         <label>E-posta</label>
-        <input x-model="licenseForm.owner_email" type="email">
-        <label>TikTok Kullanici</label>
-        <input x-model="licenseForm.owner_tiktok">
+        <input x-model="licenseForm.owner_email" type="email" placeholder="ornek@email.com">
+        <label>TikTok Kullanici Adi</label>
+        <input x-model="licenseForm.owner_tiktok" placeholder="@kullaniciadi">
         <label>Plan</label>
         <select x-model="licenseForm.plan">
-          <option value="basic">Basic (1 session)</option>
-          <option value="pro">Pro (3 session)</option>
-          <option value="premium">Premium (5 session)</option>
-          <option value="unlimited">Unlimited</option>
+          <option value="basic">Basic — 1 es zamanli yayin</option>
+          <option value="pro">Pro — 3 es zamanli yayin</option>
+          <option value="premium">Premium — 5 es zamanli yayin</option>
+          <option value="unlimited">Unlimited — Sinirsiz yayin</option>
         </select>
-        <label>Son Kullanim Tarihi</label>
+        <label>Bitis Tarihi</label>
         <input x-model="licenseForm.expires_at" type="date">
         <label>Notlar</label>
-        <textarea x-model="licenseForm.notes"></textarea>
+        <textarea x-model="licenseForm.notes" placeholder="Opsiyonel notlar..."></textarea>
+
+        <!-- Yeni olusturulan lisans anahtari -->
+        <div class="license-created" x-show="createdLicenseKey" x-transition>
+          <p>Olusturulan Lisans Anahtari:</p>
+          <div class="key-display">
+            <span x-text="createdLicenseKey"></span>
+            <button type="button" class="copy-btn" @click="copyKey()">Kopyala</button>
+          </div>
+        </div>
+
         <div class="modal-actions">
-          <button type="button" @click="showLicenseModal = false">Iptal</button>
-          <button type="submit" class="btn-primary">Kaydet</button>
+          <button type="button" @click="showLicenseModal = false; createdLicenseKey = ''">Kapat</button>
+          <button type="submit" class="btn-primary" x-show="!createdLicenseKey">Kaydet</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal: Lisans Uzat -->
+  <!-- Modal: Lisans Sure Uzat -->
   <div class="modal-backdrop" x-show="showExtendModal" x-cloak @click.self="showExtendModal = false">
     <div class="modal modal-small">
-      <h3>Lisansi Uzat</h3>
-      <label>Kac Gun Uzatilsin?</label>
+      <h3>Lisans Suresini Uzat</h3>
+      <label>Kac gun uzatilsin?</label>
       <input x-model.number="extendDays" type="number" min="1" value="30">
       <div class="modal-actions">
         <button @click="showExtendModal = false">Iptal</button>
@@ -256,24 +294,25 @@
   <!-- Modal: Oyuncu Olustur/Duzenle -->
   <div class="modal-backdrop" x-show="showPlayerModal" x-cloak @click.self="showPlayerModal = false">
     <div class="modal">
-      <h3 x-text="playerEdit ? 'Oyuncuyu Duzenle' : 'Yeni Oyuncu'"></h3>
+      <h3 x-text="playerEdit ? 'Oyuncuyu Duzenle' : 'Yeni Oyuncu Ekle'"></h3>
       <form @submit.prevent="savePlayer()">
-        <label>Ad *</label>
-        <input x-model="playerForm.name" required>
+        <label>Isim *</label>
+        <input x-model="playerForm.name" required placeholder="Ornek: Lionel Messi">
         <label>Pozisyon *</label>
         <select x-model="playerForm.position" required>
           <option>GK</option><option>CB</option><option>LB</option><option>RB</option>
           <option>CDM</option><option>CM</option><option>CAM</option>
+          <option>LM</option><option>RM</option>
           <option>LW</option><option>RW</option><option>CF</option><option>ST</option>
         </select>
-        <label>Overall (50-99) *</label>
+        <label>Genel Puan (50-99) *</label>
         <input x-model.number="playerForm.overall" type="number" min="50" max="99" required>
         <label>Kulup</label>
-        <input x-model="playerForm.club">
+        <input x-model="playerForm.club" placeholder="Ornek: Galatasaray">
         <label>Lig</label>
-        <input x-model="playerForm.league">
+        <input x-model="playerForm.league" placeholder="Ornek: Super Lig">
         <label>Uyruk</label>
-        <input x-model="playerForm.nationality">
+        <input x-model="playerForm.nationality" placeholder="Ornek: Turkey">
         <div class="modal-actions">
           <button type="button" @click="showPlayerModal = false">Iptal</button>
           <button type="submit" class="btn-primary">Kaydet</button>
@@ -281,6 +320,9 @@
       </form>
     </div>
   </div>
+
+  <!-- Toast -->
+  <div class="toast" :class="'toast-' + toast.type" x-show="toast.show" x-transition x-text="toast.msg"></div>
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="license.js"></script>
