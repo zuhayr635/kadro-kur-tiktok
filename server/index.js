@@ -94,8 +94,10 @@ spaPages.forEach((page) => {
 // ---------------------------------------------------------------------------
 io.on('connection', (socket) => {
 
-  // Join a session room
-  socket.on('join-session', (sessionId) => {
+  // Join a session room (panel sends { session_id } or plain string)
+  socket.on('join-session', (data) => {
+    const sessionId = typeof data === 'string' ? data : data?.session_id || data?.sessionId;
+    if (!sessionId) return;
     socket.join(`session_${sessionId}`);
     const session = getSession(sessionId);
     if (session) {
@@ -110,8 +112,9 @@ io.on('connection', (socket) => {
   });
 
   // Leave a session room
-  socket.on('leave-session', (sessionId) => {
-    socket.leave(`session_${sessionId}`);
+  socket.on('leave-session', (data) => {
+    const sessionId = typeof data === 'string' ? data : data?.session_id || data?.sessionId;
+    if (sessionId) socket.leave(`session_${sessionId}`);
   });
 
   // ------ Panel commands ------
@@ -227,46 +230,71 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Start TikTok connection
-  socket.on('start-tiktok', async (data, ack) => {
+  // Start TikTok connection (panel sends 'connect-tiktok' with { username, session_id })
+  async function handleTikTokConnect(data, ack) {
     try {
-      const { sessionId, tiktokUsername } = data;
+      const sessionId = data.sessionId || data.session_id;
+      const tiktokUsername = data.tiktokUsername || data.username;
+      if (!sessionId || !tiktokUsername) throw new Error('sessionId ve username gerekli');
 
       const onEvent = (event) => {
         io.to(`session_${sessionId}`).emit('tiktok-event', event);
+        // Panel expects 'tiktok-status' for connection state
+        if (event.type === 'connected') {
+          io.to(`session_${sessionId}`).emit('tiktok-status', { connected: true });
+        } else if (event.type === 'disconnected' || event.type === 'error' || event.type === 'process_exit') {
+          io.to(`session_${sessionId}`).emit('tiktok-status', { connected: false });
+        }
+        // Forward likes/gifts as panel events
+        if (event.type === 'like') {
+          io.to(`session_${sessionId}`).emit('like-update', { total: event.data?.likes || 1, user: event.data });
+        }
+        if (event.type === 'gift') {
+          io.to(`session_${sessionId}`).emit('new-request', {
+            username: event.data?.nickname || event.data?.username,
+            tier: getCardTier('gift', event.data?.total_diamonds || 0),
+            type: 'gift',
+            data: event.data,
+          });
+        }
       };
 
       const { wsPort, pid } = await tiktokBridge.startSession(sessionId, tiktokUsername, onEvent);
 
-      // Update session with python pid and ws port
       getDb().prepare('UPDATE sessions SET python_pid = ?, ws_port = ? WHERE session_id = ?')
         .run(pid || null, wsPort, sessionId);
 
-      io.to(`session_${sessionId}`).emit('tiktok-started', {
-        sessionId,
-        wsPort,
-        pid,
-      });
+      io.to(`session_${sessionId}`).emit('tiktok-status', { connected: true });
 
       if (typeof ack === 'function') ack({ success: true, wsPort, pid });
     } catch (err) {
+      const sessionId = data?.sessionId || data?.session_id;
+      if (sessionId) {
+        io.to(`session_${sessionId}`).emit('tiktok-status', { connected: false, error: err.message });
+      }
       if (typeof ack === 'function') ack({ success: false, error: err.message });
     }
-  });
+  }
+  socket.on('start-tiktok', handleTikTokConnect);
+  socket.on('connect-tiktok', handleTikTokConnect);
 
-  // Stop TikTok connection
-  socket.on('stop-tiktok', (data, ack) => {
+  // Stop TikTok connection (panel sends 'disconnect-tiktok' with { session_id })
+  function handleTikTokDisconnect(data, ack) {
     try {
-      const { sessionId } = data;
+      const sessionId = data.sessionId || data.session_id;
+      if (!sessionId) throw new Error('sessionId gerekli');
       tiktokBridge.stopSession(sessionId);
 
+      io.to(`session_${sessionId}`).emit('tiktok-status', { connected: false });
       io.to(`session_${sessionId}`).emit('tiktok-stopped', { sessionId });
 
       if (typeof ack === 'function') ack({ success: true });
     } catch (err) {
       if (typeof ack === 'function') ack({ success: false, error: err.message });
     }
-  });
+  }
+  socket.on('stop-tiktok', handleTikTokDisconnect);
+  socket.on('disconnect-tiktok', handleTikTokDisconnect);
 
   // Stop entire session
   socket.on('stop-session', (data, ack) => {
