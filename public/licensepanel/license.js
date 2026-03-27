@@ -24,26 +24,26 @@ function app() {
     playerFilter: { tier: '', position: '', league: '' },
     toast: { show: false, msg: '', type: 'success' },
 
-    // Ses efektleri icin anlasilir etiketler
+    // Ses efektleri için anlaşılır etiketler
     soundLabels: {
       'notification': 'Bildirim Sesi',
-      'card-bronze': 'Bronz Kart Acilis',
-      'card-silver': 'Gumus Kart Acilis',
-      'card-gold': 'Altin Kart Acilis',
-      'card-elite': 'Elit Kart Acilis',
+      'card-bronze': 'Bronz Kart Açılışı',
+      'card-silver': 'Gümüş Kart Açılışı',
+      'card-gold': 'Altın Kart Açılışı',
+      'card-elite': 'Elit Kart Açılışı',
       'card-reject': 'Kart Red Sesi',
-      'game-end': 'Oyun Bitis Muzigi'
+      'game-end': 'Oyun Bitiş Müziği'
     },
 
-    // Sistem ayarlari icin anlasilir etiketler
+    // Sistem ayarları için anlaşılır etiketler
     settingLabels: {
-      'game_layout': { title: 'Oyun Ekrani Duzeni', desc: '2x2 (kare grid), 4col (yan yana), focus (odak modu)' },
-      'like_threshold': { title: 'Begeni Hedefi', desc: 'Bronz kart icin gereken begeni sayisi' },
-      'max_concurrent_sessions': { title: 'Maksimum Es Zamanli Yayin', desc: 'Sistemdeki toplam es zamanli yayin limiti' },
-      'session_timeout_minutes': { title: 'Yayin Zaman Asimi (dakika)', desc: 'Otomatik kapanma suresi (dakika)' },
-      'log_retention_days': { title: 'Log Saklama Suresi (gun)', desc: 'Sistem loglari kac gun saklansin' },
-      'ws_port_start': { title: 'WebSocket Baslangic Portu', desc: 'TikTok baglantisi icin port araligi baslangici' },
-      'ws_port_end': { title: 'WebSocket Bitis Portu', desc: 'TikTok baglantisi icin port araligi bitisi' }
+      'game_layout': { title: 'Oyun Ekranı Düzeni', desc: '2x2 (kare grid), 4col (yan yana), focus (odak modu)' },
+      'like_threshold': { title: 'Beğeni Hedefi', desc: 'Bronz kart için gereken beğeni sayısı' },
+      'max_concurrent_sessions': { title: 'Maksimum Eş Zamanlı Yayın', desc: 'Sistemdeki toplam eş zamanlı yayın limiti' },
+      'session_timeout_minutes': { title: 'Yayın Zaman Aşımı (dakika)', desc: 'Otomatik kapanma süresi (dakika cinsinden)' },
+      'log_retention_days': { title: 'Log Saklama Süresi (gün)', desc: 'Sistem logları kaç gün saklanacak' },
+      'ws_port_start': { title: 'WebSocket Başlangıç Portu', desc: 'TikTok bağlantısı için port aralığı başlangıcı' },
+      'ws_port_end': { title: 'WebSocket Bitiş Portu', desc: 'TikTok bağlantısı için port aralığı bitişi' }
     },
 
     async init() {
@@ -79,7 +79,7 @@ function app() {
         localStorage.setItem('admin_token', this.token);
         this.loadDashboard();
       } else {
-        this.loginError = data?.error?.message || 'Giris basarisiz';
+        this.loginError = data?.error?.message || 'Giriş başarısız';
       }
     },
 
@@ -126,7 +126,7 @@ function app() {
         data = await this.api('PUT', `/api/licenses/${this.licenseEdit.id}`, body);
         if (data?.success) {
           this.showLicenseModal = false;
-          this.showToast('Lisans guncellendi');
+          this.showToast('Lisans güncellendi');
           this.loadLicenses();
         }
       } else {
@@ -134,19 +134,19 @@ function app() {
         if (data?.success && data.data) {
           // Yeni lisans olusturuldu - anahtari goster
           this.createdLicenseKey = data.data.license_key;
-          this.showToast('Lisans olusturuldu');
+          this.showToast('Lisans oluşturuldu');
           this.loadLicenses();
         }
       }
       if (!data?.success) {
-        this.showToast(data?.error?.message || 'Bir hata olustu', 'error');
+        this.showToast(data?.error?.message || 'Bir hata oluştu', 'error');
       }
     },
 
     copyKey() {
       if (this.createdLicenseKey) {
         navigator.clipboard.writeText(this.createdLicenseKey);
-        this.showToast('Lisans anahtari panoya kopyalandi');
+        this.showToast('Lisans anahtarı panoya kopyalandı');
       }
     },
 
@@ -160,7 +160,7 @@ function app() {
       const data = await this.api('POST', `/api/licenses/${this.extendTarget.id}/extend`, { days: this.extendDays });
       this.showExtendModal = false;
       if (data?.success) {
-        this.showToast(`Lisans ${this.extendDays} gun uzatildi`);
+        this.showToast(`Lisans ${this.extendDays} gün uzatıldı`);
       }
       this.loadLicenses();
     },
@@ -169,13 +169,13 @@ function app() {
       const action = lic.status === 'active' ? 'suspend' : 'activate';
       const data = await this.api('POST', `/api/licenses/${lic.id}/${action}`);
       if (data?.success) {
-        this.showToast(action === 'suspend' ? 'Lisans askiya alindi' : 'Lisans aktif edildi');
+        this.showToast(action === 'suspend' ? 'Lisans askıya alındı' : 'Lisans aktif edildi');
       }
       this.loadLicenses();
     },
 
     async deleteLicenseConfirm(lic) {
-      if (!confirm(`"${lic.owner_name}" adli lisansi silmek istediginize emin misiniz?`)) return;
+      if (!confirm(`"${lic.owner_name}" adli lisansı silmek istediğinize emin misiniz?`)) return;
       await this.api('DELETE', `/api/licenses/${lic.id}`);
       this.showToast('Lisans silindi');
       this.loadLicenses();
@@ -211,15 +211,15 @@ function app() {
       }
       if (data?.success) {
         this.showPlayerModal = false;
-        this.showToast(this.playerEdit ? 'Oyuncu guncellendi' : 'Oyuncu eklendi');
+        this.showToast(this.playerEdit ? 'Oyuncu güncellendi' : 'Oyuncu eklendi');
         this.loadPlayers();
       } else {
-        this.showToast(data?.error?.message || 'Bir hata olustu', 'error');
+        this.showToast(data?.error?.message || 'Bir hata oluştu', 'error');
       }
     },
 
     async deletePlayerConfirm(p) {
-      if (!confirm(`"${p.name}" adli oyuncuyu silmek istediginize emin misiniz?`)) return;
+      if (!confirm(`"${p.name}" adli oyuncuyu silmek istediğinize emin misiniz?`)) return;
       await this.api('DELETE', `/api/admin/players/${p.id}`);
       this.showToast('Oyuncu silindi');
       this.loadPlayers();
@@ -233,14 +233,14 @@ function app() {
     async setSoundMode(s, mode) {
       await this.api('PUT', `/api/admin/sounds/${s.sound_key}`, { mode });
       s.mode = mode;
-      this.showToast(mode === 'synth' ? 'Otomatik ses secildi' : 'Ozel ses modu secildi');
+      this.showToast(mode === 'synth' ? 'Otomatik ses seçildi' : 'Özel ses modu seçildi');
     },
 
     async uploadSound(s, event) {
       const file = event.target.files[0];
       if (!file) return;
       // Ses dosyasi yukleme - sunucu destegi eklendiginde aktif olacak
-      this.showToast(`"${file.name}" dosyasi secildi (yukleme yakinda)`);
+      this.showToast(`"${file.name}" dosyası seçildi (yükleme yakında)`);
     },
 
     async loadSettings() {
