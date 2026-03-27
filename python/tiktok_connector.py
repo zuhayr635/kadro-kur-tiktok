@@ -1,3 +1,8 @@
+"""
+TikTok Live Connector for Kadro Kur
+Compatible with TikTokLive >= 6.0
+"""
+
 import sys
 import asyncio
 import json
@@ -11,6 +16,7 @@ from TikTokLive.events import (
     LikeEvent,
     GiftEvent,
     CommentEvent,
+    JoinEvent,
 )
 
 # --- CLI Arguments ---
@@ -18,7 +24,7 @@ if len(sys.argv) < 4:
     print("Usage: python tiktok_connector.py <tiktok_username> <ws_port> <session_id>")
     sys.exit(1)
 
-TIKTOK_USERNAME = sys.argv[1]
+TIKTOK_USERNAME = sys.argv[1].lstrip("@")
 WS_PORT = int(sys.argv[2])
 SESSION_ID = sys.argv[3]
 
@@ -52,13 +58,8 @@ async def send_to_node(event_type, data):
         print(f"WS error: {e}", flush=True)
 
 
-# --- TikTok Client ---
-client = TikTokLiveClient(
-    unique_id=TIKTOK_USERNAME,
-    process_initial_data=True,
-    fetch_room_info_on_connect=True,
-    enable_extended_gift_info=True,
-)
+# --- TikTok Client (v6+ API) ---
+client = TikTokLiveClient(unique_id=TIKTOK_USERNAME)
 
 
 # --- Event Handlers ---
@@ -71,13 +72,13 @@ async def on_connect(event: ConnectEvent):
     print(f"Connected to @{TIKTOK_USERNAME} live room", flush=True)
     await send_to_node("connected", {
         "username": TIKTOK_USERNAME,
-        "room_id": getattr(event, "room_id", None),
+        "room_id": client.room_id,
     })
 
 
 @client.on(DisconnectEvent)
 async def on_disconnect(event: DisconnectEvent):
-    """Fires when disconnected. Attempts auto-reconnect up to MAX_RECONNECT_ATTEMPTS."""
+    """Fires when disconnected. Attempts auto-reconnect."""
     global reconnect_attempts, shutting_down
 
     if shutting_down:
@@ -92,10 +93,7 @@ async def on_disconnect(event: DisconnectEvent):
     reconnect_attempts += 1
     if reconnect_attempts <= MAX_RECONNECT_ATTEMPTS:
         delay = min(5 * reconnect_attempts, 30)
-        print(
-            f"Reconnect attempt {reconnect_attempts}/{MAX_RECONNECT_ATTEMPTS} in {delay}s...",
-            flush=True,
-        )
+        print(f"Reconnect attempt {reconnect_attempts}/{MAX_RECONNECT_ATTEMPTS} in {delay}s...", flush=True)
         await asyncio.sleep(delay)
         try:
             await client.start()
@@ -111,7 +109,7 @@ async def on_disconnect(event: DisconnectEvent):
 
 @client.on(LikeEvent)
 async def on_like(event: LikeEvent):
-    """Fires on like events. Uses event.likes for combo count instead of 1."""
+    """Fires on like events. Uses event.likes for combo count."""
     like_count = getattr(event, "likes", 1) or 1
     user = getattr(event, "user", None)
     username = getattr(user, "unique_id", "unknown") if user else "unknown"
@@ -128,14 +126,11 @@ async def on_like(event: LikeEvent):
 
 @client.on(GiftEvent)
 async def on_gift(event: GiftEvent):
-    """
-    Fires on gift events.
-    Only process gifts when the streak has ended (not currently repeating)
-    to avoid duplicate counting during gift streaks.
-    """
-    # For streakable gifts, only process when the streak is complete
-    if hasattr(event, "gift") and hasattr(event.gift, "streakable"):
-        if event.gift.streakable and getattr(event, "streaking", False):
+    """Fires on gift events. Only process when streak is complete."""
+    # For streakable gifts, only process when the streak is done
+    gift = getattr(event, "gift", None)
+    if gift and getattr(gift, "streakable", False):
+        if getattr(event, "streaking", False):
             return
 
     user = getattr(event, "user", None)
@@ -143,7 +138,6 @@ async def on_gift(event: GiftEvent):
     nickname = getattr(user, "nickname", username) if user else username
     user_id = getattr(user, "user_id", None) if user else None
 
-    gift = getattr(event, "gift", None)
     gift_name = getattr(gift, "name", "unknown") if gift else "unknown"
     gift_id = getattr(gift, "id", None) if gift else None
     diamond_count = getattr(gift, "diamond_count", 0) if gift else 0
@@ -163,7 +157,7 @@ async def on_gift(event: GiftEvent):
 
 @client.on(CommentEvent)
 async def on_comment(event: CommentEvent):
-    """Fires when a comment is received in the live chat."""
+    """Fires when a comment is received."""
     user = getattr(event, "user", None)
     username = getattr(user, "unique_id", "unknown") if user else "unknown"
     nickname = getattr(user, "nickname", username) if user else username
@@ -175,6 +169,19 @@ async def on_comment(event: CommentEvent):
         "nickname": nickname,
         "user_id": str(user_id) if user_id else None,
         "comment": comment,
+    })
+
+
+@client.on(JoinEvent)
+async def on_join(event: JoinEvent):
+    """Fires when a user joins the live."""
+    user = getattr(event, "user", None)
+    username = getattr(user, "unique_id", "unknown") if user else "unknown"
+    nickname = getattr(user, "nickname", username) if user else username
+
+    await send_to_node("join", {
+        "username": username,
+        "nickname": nickname,
     })
 
 
@@ -208,8 +215,6 @@ def handle_sigterm(*args):
 
 
 signal.signal(signal.SIGTERM, handle_sigterm)
-
-# Also handle SIGINT (Ctrl+C) the same way
 signal.signal(signal.SIGINT, handle_sigterm)
 
 

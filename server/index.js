@@ -78,6 +78,11 @@ app.use('/api/profile', profileRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/logs', logsRouter);
 
+// Favicon fallback
+app.get('/favicon.ico', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'favicon.svg'));
+});
+
 // SPA fallback for game pages
 const spaPages = ['game', 'panel', 'licensepanel', 'profile'];
 spaPages.forEach((page) => {
@@ -264,7 +269,8 @@ io.on('connection', (socket) => {
       getDb().prepare('UPDATE sessions SET python_pid = ?, ws_port = ? WHERE session_id = ?')
         .run(pid || null, wsPort, sessionId);
 
-      io.to(`session_${sessionId}`).emit('tiktok-status', { connected: true });
+      // Don't send connected=true here - wait for Python's 'connected' event
+      io.to(`session_${sessionId}`).emit('tiktok-status', { connected: false, connecting: true });
 
       if (typeof ack === 'function') ack({ success: true, wsPort, pid });
     } catch (err) {
