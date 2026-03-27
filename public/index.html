@@ -9,289 +9,485 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #06060a; --surface: #0f1120; --surface2: #161830;
-      --accent: #ff3d5a; --accent2: #6c5ce7; --gold: #f0c040;
-      --text: #eaeaef; --text-muted: #7a7d9e; --border: rgba(255,255,255,0.06); --success: #00d68f;
-    }
-    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
-    .icon { width: 40px; height: 40px; color: var(--accent2); margin-bottom: 20px; }
-    .icon-sm { width: 20px; height: 20px; flex-shrink: 0; }
+    :root { --bg:#06060a;--surface:#0f1120;--surface2:#161830;--surface3:#1c1f3a;--accent:#ff3d5a;--accent2:#6c5ce7;--gold:#f0c040;--text:#eaeaef;--text-muted:#7a7d9e;--border:rgba(255,255,255,0.06);--success:#00d68f;--bronze:#cd7f32;--silver:#c0c0c0;--elite-start:#8b00ff;--elite-end:#00bfff; }
+    html { scroll-behavior: smooth; }
+    body { font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden; }
+    .container { max-width:1200px;margin:0 auto;padding:0 24px; }
+    .icon { width:36px;height:36px;color:var(--accent2);margin-bottom:18px; }
+    .icon-sm { width:20px;height:20px;flex-shrink:0; }
+    a { color:inherit;text-decoration:none; }
+    .section-tag { display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--accent2);margin-bottom:16px; }
+    .section-tag svg { width:16px;height:16px; }
 
-    /* Hero */
-    .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px; position: relative; overflow: hidden; }
-    .hero::before { content: ''; position: absolute; top: -40%; left: 50%; transform: translateX(-50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(108,92,231,0.15), transparent 70%); pointer-events: none; }
-    .hero::after { content: ''; position: absolute; bottom: -30%; left: 30%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,61,90,0.1), transparent 70%); pointer-events: none; }
-    .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(108,92,231,0.12); border: 1px solid rgba(108,92,231,0.25); border-radius: 100px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: #a78bfa; margin-bottom: 32px; position: relative; }
-    .hero-badge .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    .hero h1 { font-size: clamp(48px, 8vw, 88px); font-weight: 900; line-height: 1; letter-spacing: -2px; position: relative; margin-bottom: 12px; }
-    .hero h1 .gradient { background: linear-gradient(135deg, #ff3d5a, #ff6b6b, #f0c040); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .hero h1 .gradient2 { background: linear-gradient(135deg, #6c5ce7, #a78bfa, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .hero-sub { font-size: clamp(18px, 2.5vw, 24px); color: var(--text-muted); max-width: 640px; line-height: 1.6; margin-bottom: 48px; }
-    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; position: relative; }
-    .btn-hero { display: inline-flex; align-items: center; gap: 10px; padding: 16px 36px; border-radius: 14px; font-size: 16px; font-weight: 700; text-decoration: none; transition: all 0.25s; border: none; cursor: pointer; }
-    .btn-hero-primary { background: linear-gradient(135deg, #ff3d5a, #e63946); color: #fff; box-shadow: 0 4px 24px rgba(255,61,90,0.3); }
-    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,61,90,0.4); }
-    .btn-hero-secondary { background: rgba(108,92,231,0.12); border: 1px solid rgba(108,92,231,0.3); color: #a78bfa; }
-    .btn-hero-secondary:hover { background: rgba(108,92,231,0.2); transform: translateY(-2px); }
+    /* NAV */
+    nav { position:fixed;top:0;left:0;right:0;z-index:50;padding:16px 0;transition:background 0.3s; }
+    nav.scrolled { background:rgba(6,6,10,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border); }
+    .nav-inner { display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:0 24px; }
+    .nav-logo { font-size:20px;font-weight:800;letter-spacing:2px; }
+    .nav-logo span:first-child { background:linear-gradient(135deg,#ff3d5a,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+    .nav-logo span:last-child { background:linear-gradient(135deg,#6c5ce7,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+    .nav-links { display:flex;align-items:center;gap:32px; }
+    .nav-links a { font-size:14px;font-weight:500;color:var(--text-muted);transition:color 0.2s; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-cta { padding:10px 24px;border-radius:10px;background:linear-gradient(135deg,#ff3d5a,#e63946);color:#fff !important;font-weight:700;font-size:14px;transition:all 0.2s; }
+    .nav-cta:hover { transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,61,90,0.3); }
+    @media(max-width:768px) { .nav-links { display:none; } }
 
-    /* Floating Cards */
-    .floating-cards { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; overflow: hidden; }
-    .float-card { position: absolute; width: 80px; height: 110px; border-radius: 8px; opacity: 0.08; animation: floatUp 20s linear infinite; }
-    .float-card:nth-child(1) { left: 5%; animation-delay: 0s; background: linear-gradient(135deg, #cd7f32, #a0522d); }
-    .float-card:nth-child(2) { left: 15%; animation-delay: -4s; background: linear-gradient(135deg, #c0c0c0, #a8a8a8); }
-    .float-card:nth-child(3) { left: 75%; animation-delay: -8s; background: linear-gradient(135deg, #ffd700, #daa520); }
-    .float-card:nth-child(4) { left: 85%; animation-delay: -12s; background: linear-gradient(135deg, #8b00ff, #00bfff); }
-    .float-card:nth-child(5) { left: 45%; animation-delay: -16s; background: linear-gradient(135deg, #ff3d5a, #ff6b6b); }
-    .float-card:nth-child(6) { left: 60%; animation-delay: -6s; background: linear-gradient(135deg, #6c5ce7, #a78bfa); }
-    @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.08; } 90% { opacity: 0.08; } 100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; } }
+    /* HERO */
+    .hero { min-height:100vh;display:flex;align-items:center;padding:120px 0 80px;position:relative;overflow:hidden; }
+    .hero::before { content:'';position:absolute;top:-30%;left:40%;width:900px;height:900px;background:radial-gradient(circle,rgba(108,92,231,0.12),transparent 70%);pointer-events:none; }
+    .hero::after { content:'';position:absolute;bottom:-20%;right:30%;width:700px;height:700px;background:radial-gradient(circle,rgba(255,61,90,0.08),transparent 70%);pointer-events:none; }
+    .hero-inner { display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1200px;margin:0 auto;padding:0 24px;position:relative; }
+    .hero-text { z-index:2; }
+    .hero-badge { display:inline-flex;align-items:center;gap:8px;background:rgba(108,92,231,0.12);border:1px solid rgba(108,92,231,0.25);border-radius:100px;padding:8px 20px;font-size:13px;font-weight:600;color:#a78bfa;margin-bottom:28px; }
+    .hero-badge .dot { width:8px;height:8px;background:var(--success);border-radius:50%;animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+    .hero h1 { font-size:clamp(40px,5vw,64px);font-weight:900;line-height:1.05;letter-spacing:-2px;margin-bottom:20px; }
+    .hero h1 .gr1 { background:linear-gradient(135deg,#ff3d5a,#ff6b6b,#f0c040);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+    .hero h1 .gr2 { background:linear-gradient(135deg,#6c5ce7,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+    .hero-desc { font-size:18px;color:var(--text-muted);line-height:1.7;margin-bottom:36px;max-width:480px; }
+    .hero-actions { display:flex;gap:14px;flex-wrap:wrap; }
+    .btn { display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:700;transition:all 0.25s;border:none;cursor:pointer; }
+    .btn-primary { background:linear-gradient(135deg,#ff3d5a,#e63946);color:#fff;box-shadow:0 4px 20px rgba(255,61,90,0.3); }
+    .btn-primary:hover { transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,61,90,0.4); }
+    .btn-ghost { background:rgba(108,92,231,0.1);border:1px solid rgba(108,92,231,0.25);color:#a78bfa; }
+    .btn-ghost:hover { background:rgba(108,92,231,0.18);transform:translateY(-2px); }
 
-    /* Features */
-    .features { padding: 100px 20px; max-width: 1200px; margin: 0 auto; }
-    .features-title { text-align: center; font-size: 40px; font-weight: 800; margin-bottom: 16px; letter-spacing: -1px; }
-    .features-sub { text-align: center; color: var(--text-muted); font-size: 18px; max-width: 540px; margin: 0 auto 64px; }
-    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
-    .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 36px; transition: all 0.3s; position: relative; overflow: hidden; }
-    .feature-card:hover { transform: translateY(-4px); border-color: rgba(108,92,231,0.2); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
-    .feature-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; opacity: 0; transition: opacity 0.3s; }
-    .feature-card:hover::before { opacity: 1; }
-    .feature-card:nth-child(1)::before { background: linear-gradient(90deg, #ff3d5a, #ff6b6b); }
-    .feature-card:nth-child(2)::before { background: linear-gradient(90deg, #6c5ce7, #a78bfa); }
-    .feature-card:nth-child(3)::before { background: linear-gradient(90deg, #00d68f, #00b894); }
-    .feature-card:nth-child(4)::before { background: linear-gradient(90deg, #f0c040, #f7dc6f); }
-    .feature-card:nth-child(5)::before { background: linear-gradient(90deg, #29b6f6, #4fc3f7); }
-    .feature-card:nth-child(6)::before { background: linear-gradient(90deg, #ff6b6b, #ffa07a); }
-    .feature-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
-    .feature-card p { color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+    /* GAME PREVIEW - CSS-only mock */
+    .hero-visual { position:relative;z-index:2; }
+    .game-preview { background:rgba(15,17,32,0.6);border:1px solid rgba(108,92,231,0.15);border-radius:20px;padding:24px;position:relative;overflow:hidden;backdrop-filter:blur(8px); }
+    .game-preview::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--gold)); }
+    .gp-header { text-align:center;margin-bottom:20px; }
+    .gp-header h3 { font-size:14px;font-weight:700;letter-spacing:3px;color:var(--accent);text-transform:uppercase; }
+    .gp-teams { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+    .gp-team { background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden; }
+    .gp-team::before { content:'';position:absolute;top:0;left:0;right:0;height:2px; }
+    .gp-team:nth-child(1)::before { background:#e94560; }
+    .gp-team:nth-child(2)::before { background:#3498db; }
+    .gp-team:nth-child(3)::before { background:#2ecc71; }
+    .gp-team:nth-child(4)::before { background:#f1c40f; }
+    .gp-team-name { font-size:12px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between; }
+    .gp-team-name .ovr { color:var(--gold);font-family:'JetBrains Mono',monospace; }
+    .gp-field { display:grid;grid-template-columns:repeat(4,1fr);gap:4px; }
+    .gp-slot { width:100%;aspect-ratio:0.72;border-radius:4px;position:relative; }
+    .gp-slot.filled { }
+    .gp-slot.empty { border:1px dashed rgba(255,255,255,0.1);background:rgba(255,255,255,0.02); }
+    .mini-card { width:100%;height:100%;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:7px;font-weight:700;line-height:1.2;text-align:center;overflow:hidden; }
+    .mini-card.bronze { background:linear-gradient(180deg,rgba(205,127,50,0.3),rgba(160,82,45,0.2));border:1px solid rgba(205,127,50,0.3);color:#cd7f32; }
+    .mini-card.silver { background:linear-gradient(180deg,rgba(192,192,192,0.25),rgba(168,168,168,0.15));border:1px solid rgba(192,192,192,0.25);color:#d0d0d0; }
+    .mini-card.gold { background:linear-gradient(180deg,rgba(255,215,0,0.25),rgba(218,165,32,0.15));border:1px solid rgba(255,215,0,0.25);color:#ffd700; }
+    .mini-card.elite { background:linear-gradient(180deg,rgba(139,0,255,0.25),rgba(0,191,255,0.15));border:1px solid rgba(139,0,255,0.3);color:#a78bfa; }
+    .mini-card .mc-ovr { font-size:10px;font-weight:900; }
+    .mini-card .mc-name { font-size:6px;opacity:0.8;margin-top:1px; }
+    .gp-notif { margin-top:12px;background:linear-gradient(90deg,rgba(0,214,143,0.1),transparent);border-left:3px solid var(--success);border-radius:0 8px 8px 0;padding:10px 14px;font-size:11px;animation:slideIn 0.5s ease; }
+    @keyframes slideIn { from{transform:translateX(-20px);opacity:0}to{transform:translateX(0);opacity:1} }
 
-    /* How It Works */
-    .how-it-works { padding: 100px 20px; background: linear-gradient(180deg, transparent, rgba(108,92,231,0.03), transparent); }
-    .how-inner { max-width: 900px; margin: 0 auto; }
-    .how-title { text-align: center; font-size: 40px; font-weight: 800; margin-bottom: 64px; letter-spacing: -1px; }
-    .steps { display: flex; flex-direction: column; gap: 40px; }
-    .step { display: flex; align-items: flex-start; gap: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 36px; transition: transform 0.3s; }
-    .step:hover { transform: translateX(8px); }
-    .step-num { flex-shrink: 0; width: 56px; height: 56px; background: linear-gradient(135deg, var(--accent2), #a78bfa); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; color: #fff; }
-    .step h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    .step p { color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+    /* Card reveal overlay */
+    .card-reveal { position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;animation:cardPop 3s ease infinite; }
+    .card-reveal-inner { width:120px;height:170px;border-radius:12px;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(255,215,0,0.3),0 0 80px rgba(255,215,0,0.1); }
+    .card-reveal-inner::before { content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,215,0,0.15),rgba(218,165,32,0.3));border:2px solid rgba(255,215,0,0.4);border-radius:12px; }
+    .cr-content { position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px; }
+    .cr-ovr { font-size:28px;font-weight:900;color:#ffd700; }
+    .cr-pos { font-size:10px;font-weight:700;color:rgba(255,215,0,0.7);margin-top:2px; }
+    .cr-avatar { width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.1);margin:8px 0;border:2px solid rgba(255,215,0,0.3); }
+    .cr-name { font-size:11px;font-weight:700;color:#fff;text-align:center; }
+    .cr-club { font-size:8px;color:rgba(255,255,255,0.5);margin-top:2px; }
+    .cr-stats { display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:6px;width:100%; }
+    .cr-stat { text-align:center;font-size:7px;color:rgba(255,215,0,0.6); }
+    .cr-stat span { display:block;font-size:9px;font-weight:800;color:#ffd700; }
+    @keyframes cardPop { 0%,100%{transform:translate(-50%,-50%) scale(0.95) rotateY(0deg);opacity:0.9}50%{transform:translate(-50%,-50%) scale(1) rotateY(5deg);opacity:1} }
 
-    /* Tiers */
-    .tiers { padding: 100px 20px; max-width: 1000px; margin: 0 auto; }
-    .tiers-title { text-align: center; font-size: 40px; font-weight: 800; margin-bottom: 16px; letter-spacing: -1px; }
-    .tiers-sub { text-align: center; color: var(--text-muted); font-size: 18px; margin-bottom: 64px; }
-    .tiers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-    .tier-card { border-radius: 20px; padding: 32px; text-align: center; border: 1px solid var(--border); transition: transform 0.3s; }
-    .tier-card:hover { transform: scale(1.05); }
-    .tier-card.bronze { background: linear-gradient(180deg, rgba(205,127,50,0.1), var(--surface)); border-color: rgba(205,127,50,0.2); }
-    .tier-card.silver { background: linear-gradient(180deg, rgba(192,192,192,0.1), var(--surface)); border-color: rgba(192,192,192,0.2); }
-    .tier-card.gold { background: linear-gradient(180deg, rgba(255,215,0,0.1), var(--surface)); border-color: rgba(255,215,0,0.2); }
-    .tier-card.elite { background: linear-gradient(180deg, rgba(139,0,255,0.1), var(--surface)); border-color: rgba(139,0,255,0.2); }
-    .tier-icon { margin-bottom: 16px; }
-    .tier-icon svg { width: 48px; height: 48px; }
-    .tier-card h3 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
-    .tier-card .tier-range { font-size: 14px; color: var(--text-muted); margin-bottom: 4px; }
-    .tier-card .tier-trigger { font-size: 13px; color: var(--text-muted); }
-    .tier-card.bronze h3 { color: #cd7f32; }
-    .tier-card.bronze .tier-icon svg { color: #cd7f32; }
-    .tier-card.silver h3 { color: #c0c0c0; }
-    .tier-card.silver .tier-icon svg { color: #c0c0c0; }
-    .tier-card.gold h3 { color: #ffd700; }
-    .tier-card.gold .tier-icon svg { color: #ffd700; }
-    .tier-card.elite h3 { background: linear-gradient(135deg, #8b00ff, #00bfff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .tier-card.elite .tier-icon svg { color: #8b00ff; }
+    @media(max-width:900px) { .hero-inner{grid-template-columns:1fr;text-align:center;} .hero-desc{margin:0 auto 36px;} .hero-visual{max-width:500px;margin:0 auto;} }
 
-    /* Stats */
-    .stats-section { padding: 80px 20px; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-    .stats-inner { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center; }
-    .stat-big { font-size: 48px; font-weight: 900; }
-    .stat-big.c1 { color: var(--accent); } .stat-big.c2 { color: var(--accent2); } .stat-big.c3 { color: var(--gold); } .stat-big.c4 { color: var(--success); }
-    .stat-desc { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+    /* FEATURES */
+    .features { padding:120px 0; }
+    .features-header { text-align:center;margin-bottom:72px; }
+    .features-header h2 { font-size:40px;font-weight:800;letter-spacing:-1px; }
+    .features-header p { color:var(--text-muted);font-size:18px;max-width:540px;margin:16px auto 0; }
+    .features-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:20px; }
+    .feat { background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;transition:all 0.3s;position:relative;overflow:hidden; }
+    .feat:hover { transform:translateY(-4px);border-color:rgba(108,92,231,0.2);box-shadow:0 12px 40px rgba(0,0,0,0.3); }
+    .feat::after { content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity 0.3s; }
+    .feat:hover::after { opacity:1; }
+    .feat:nth-child(1)::after{background:linear-gradient(90deg,#ff3d5a,#ff6b6b)} .feat:nth-child(2)::after{background:linear-gradient(90deg,#6c5ce7,#a78bfa)} .feat:nth-child(3)::after{background:linear-gradient(90deg,#00d68f,#00b894)} .feat:nth-child(4)::after{background:linear-gradient(90deg,#f0c040,#f7dc6f)} .feat:nth-child(5)::after{background:linear-gradient(90deg,#29b6f6,#4fc3f7)} .feat:nth-child(6)::after{background:linear-gradient(90deg,#ff6b6b,#ffa07a)}
+    .feat h3 { font-size:18px;font-weight:700;margin-bottom:10px; }
+    .feat p { color:var(--text-muted);font-size:14px;line-height:1.7; }
+    @media(max-width:900px) { .features-grid{grid-template-columns:1fr 1fr;} }
+    @media(max-width:600px) { .features-grid{grid-template-columns:1fr;} }
+
+    /* HOW */
+    .how { padding:120px 0;background:linear-gradient(180deg,transparent,rgba(108,92,231,0.02),transparent); }
+    .how-header { text-align:center;margin-bottom:72px; }
+    .how-header h2 { font-size:40px;font-weight:800;letter-spacing:-1px; }
+    .steps { max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:24px; }
+    .step { display:flex;align-items:flex-start;gap:24px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;transition:transform 0.3s; }
+    .step:hover { transform:translateX(6px); }
+    .step-n { flex-shrink:0;width:48px;height:48px;background:linear-gradient(135deg,var(--accent2),#a78bfa);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff; }
+    .step h3 { font-size:18px;font-weight:700;margin-bottom:6px; }
+    .step p { color:var(--text-muted);font-size:14px;line-height:1.7; }
+    @media(max-width:600px) { .step{flex-direction:column;} }
+
+    /* TIERS */
+    .tiers { padding:120px 0; }
+    .tiers-header { text-align:center;margin-bottom:72px; }
+    .tiers-header h2 { font-size:40px;font-weight:800;letter-spacing:-1px; }
+    .tiers-header p { color:var(--text-muted);font-size:18px;margin-top:16px; }
+    .tiers-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1000px;margin:0 auto; }
+    .tier { border-radius:16px;padding:32px;text-align:center;border:1px solid var(--border);transition:transform 0.3s;position:relative;overflow:hidden; }
+    .tier:hover { transform:scale(1.04); }
+    .tier::before { content:'';position:absolute;top:0;left:0;right:0;height:3px; }
+    .tier.bronze { background:linear-gradient(180deg,rgba(205,127,50,0.08),var(--surface)); } .tier.bronze::before{background:var(--bronze);} .tier.bronze h3{color:var(--bronze);}
+    .tier.silver { background:linear-gradient(180deg,rgba(192,192,192,0.06),var(--surface)); } .tier.silver::before{background:var(--silver);} .tier.silver h3{color:var(--silver);}
+    .tier.gold { background:linear-gradient(180deg,rgba(255,215,0,0.08),var(--surface)); } .tier.gold::before{background:var(--gold);} .tier.gold h3{color:var(--gold);}
+    .tier.elite { background:linear-gradient(180deg,rgba(139,0,255,0.08),var(--surface)); } .tier.elite::before{background:linear-gradient(90deg,var(--elite-start),var(--elite-end));} .tier.elite h3{background:linear-gradient(135deg,var(--elite-start),var(--elite-end));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .tier-icon { margin-bottom:16px; } .tier-icon svg { width:44px;height:44px; }
+    .tier h3 { font-size:20px;font-weight:800;margin-bottom:8px; }
+    .tier .range { font-size:14px;color:var(--text-muted);margin-bottom:4px; }
+    .tier .trigger { font-size:12px;color:var(--text-muted); }
+    @media(max-width:900px) { .tiers-grid{grid-template-columns:1fr 1fr;} }
+    @media(max-width:500px) { .tiers-grid{grid-template-columns:1fr;} }
+
+    /* PRICING */
+    .pricing { padding:120px 0;background:linear-gradient(180deg,transparent,rgba(255,61,90,0.02),transparent); }
+    .pricing-header { text-align:center;margin-bottom:72px; }
+    .pricing-header h2 { font-size:40px;font-weight:800;letter-spacing:-1px; }
+    .pricing-header p { color:var(--text-muted);font-size:18px;margin-top:16px; }
+    .pricing-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1000px;margin:0 auto; }
+    .price-card { background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 32px;text-align:center;transition:all 0.3s;position:relative; }
+    .price-card:hover { transform:translateY(-6px);box-shadow:0 16px 48px rgba(0,0,0,0.3); }
+    .price-card.popular { border-color:rgba(108,92,231,0.3);box-shadow:0 0 60px rgba(108,92,231,0.08); }
+    .price-card.popular::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent2),#a78bfa);border-radius:20px 20px 0 0; }
+    .popular-tag { position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--accent2),#a78bfa);color:#fff;font-size:11px;font-weight:700;padding:4px 16px;border-radius:100px;text-transform:uppercase;letter-spacing:1px; }
+    .price-plan { font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px; }
+    .price-amount { font-size:48px;font-weight:900;margin-bottom:4px; }
+    .price-card:nth-child(1) .price-amount { color:var(--accent); }
+    .price-card:nth-child(2) .price-amount { color:var(--accent2); }
+    .price-card:nth-child(3) .price-amount { color:var(--gold); }
+    .price-period { font-size:14px;color:var(--text-muted);margin-bottom:28px; }
+    .price-features { list-style:none;text-align:left;margin-bottom:32px; }
+    .price-features li { display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-muted);padding:8px 0;border-bottom:1px solid var(--border); }
+    .price-features li:last-child { border:none; }
+    .price-features li svg { width:16px;height:16px;color:var(--success);flex-shrink:0; }
+    .price-features li.disabled { opacity:0.35; }
+    .price-features li.disabled svg { color:var(--text-muted); }
+    .price-btn { display:block;width:100%;padding:14px;border-radius:12px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s; }
+    .price-btn-outline { background:transparent;border:1px solid var(--border);color:var(--text-muted); }
+    .price-btn-outline:hover { border-color:var(--accent2);color:var(--text); }
+    .price-btn-fill { background:linear-gradient(135deg,var(--accent2),#a78bfa);color:#fff; }
+    .price-btn-fill:hover { transform:translateY(-1px);box-shadow:0 4px 16px rgba(108,92,231,0.3); }
+    .price-btn-gold { background:linear-gradient(135deg,var(--gold),#daa520);color:#1a1a2e; }
+    .price-btn-gold:hover { transform:translateY(-1px);box-shadow:0 4px 16px rgba(240,192,64,0.3); }
+    @media(max-width:900px) { .pricing-grid{grid-template-columns:1fr;max-width:400px;} }
+
+    /* STATS */
+    .stats { padding:80px 0;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border); }
+    .stats-inner { display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center; }
+    .stat-num { font-size:44px;font-weight:900; }
+    .stat-num.c1{color:var(--accent)} .stat-num.c2{color:var(--accent2)} .stat-num.c3{color:var(--gold)} .stat-num.c4{color:var(--success)}
+    .stat-label { font-size:13px;color:var(--text-muted);margin-top:6px;text-transform:uppercase;letter-spacing:1px;font-weight:600; }
+    @media(max-width:768px) { .stats-inner{grid-template-columns:repeat(2,1fr);} }
 
     /* CTA */
-    .cta { padding: 120px 20px; text-align: center; position: relative; }
-    .cta::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 600px; height: 400px; background: radial-gradient(circle, rgba(255,61,90,0.08), transparent 70%); pointer-events: none; }
-    .cta h2 { font-size: 44px; font-weight: 900; margin-bottom: 20px; letter-spacing: -1px; position: relative; }
-    .cta p { color: var(--text-muted); font-size: 18px; max-width: 500px; margin: 0 auto 40px; }
-    .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; }
+    .cta { padding:140px 0;text-align:center;position:relative; }
+    .cta::before { content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:500px;background:radial-gradient(circle,rgba(108,92,231,0.06),transparent 70%);pointer-events:none; }
+    .cta h2 { font-size:44px;font-weight:900;letter-spacing:-1px;position:relative;margin-bottom:20px; }
+    .cta p { color:var(--text-muted);font-size:18px;max-width:520px;margin:0 auto 40px;line-height:1.7; }
+    .cta-actions { display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative; }
 
-    /* Footer */
-    footer { padding: 40px 20px; text-align: center; border-top: 1px solid var(--border); }
-    footer p { color: var(--text-muted); font-size: 14px; }
-    footer a { color: #29b6f6; text-decoration: none; } footer a:hover { text-decoration: underline; }
-    .footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
-    .footer-links a { color: var(--text-muted); font-size: 14px; transition: color 0.2s; } .footer-links a:hover { color: var(--text); }
-
-    @media (max-width: 768px) { .stats-inner { grid-template-columns: repeat(2, 1fr); } .step { flex-direction: column; } .tiers-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 480px) { .tiers-grid { grid-template-columns: 1fr; } .hero-actions { flex-direction: column; align-items: center; } }
+    /* FOOTER */
+    footer { padding:48px 0;border-top:1px solid var(--border); }
+    .footer-inner { display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px; }
+    .footer-brand { font-size:16px;font-weight:700;letter-spacing:1px;color:var(--text-muted); }
+    .footer-links { display:flex;gap:24px; }
+    .footer-links a { font-size:13px;color:var(--text-muted);transition:color 0.2s; }
+    .footer-links a:hover { color:var(--text); }
+    .footer-copy { width:100%;text-align:center;margin-top:24px;padding-top:24px;border-top:1px solid var(--border);font-size:13px;color:rgba(122,125,158,0.6); }
   </style>
 </head>
 <body>
 
-  <div class="floating-cards"><div class="float-card"></div><div class="float-card"></div><div class="float-card"></div><div class="float-card"></div><div class="float-card"></div><div class="float-card"></div></div>
+  <!-- NAV -->
+  <nav id="nav">
+    <div class="nav-inner">
+      <div class="nav-logo"><span>KADRO</span> <span>KUR</span></div>
+      <div class="nav-links">
+        <a href="#features">Ozellikler</a>
+        <a href="#how">Nasil Calisir</a>
+        <a href="#tiers">Kartlar</a>
+        <a href="#pricing">Fiyatlar</a>
+        <a href="/panel" class="nav-cta">Yayina Basla</a>
+      </div>
+    </div>
+  </nav>
 
-  <!-- Hero -->
+  <!-- HERO -->
   <section class="hero">
-    <div class="hero-badge">
-      <span class="dot"></span>
-      TikTok Canli Yayin Oyunu
-    </div>
-    <h1><span class="gradient">KADRO</span> <span class="gradient2">KUR</span></h1>
-    <p class="hero-sub">TikTok canli yayinlarinda izleyicilerinle birlikte futbol kadrosu kur. Begeniler ve hediyelerle kart ac, 4 takimin kadrosunu tamamla!</p>
-    <div class="hero-actions">
-      <a href="/panel" class="btn-hero btn-hero-primary">
-        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Yayina Basla
-      </a>
-      <a href="https://t.me/luanamobile" target="_blank" class="btn-hero btn-hero-secondary">
-        <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-        Lisans Al
-      </a>
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-badge"><span class="dot"></span>TikTok Canli Yayin Oyunu</div>
+        <h1><span class="gr1">Canli Yayinda</span><br><span class="gr2">Kadro Kur</span></h1>
+        <p class="hero-desc">Izleyicilerin begeni ve hediyelerle kart acar, sen kadrolara dagitirsin. 4 takim yarisir, en iyi kadroyu kuran kazanir.</p>
+        <div class="hero-actions">
+          <a href="/panel" class="btn btn-primary"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Yayina Basla</a>
+          <a href="#pricing" class="btn btn-ghost"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Fiyatlari Gor</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="game-preview">
+          <div class="gp-header"><h3>Kadro Kur</h3></div>
+          <div class="gp-teams">
+            <div class="gp-team">
+              <div class="gp-team-name">Aslanlar <span class="ovr">743</span></div>
+              <div class="gp-field">
+                <div class="gp-slot filled"><div class="mini-card gold"><span class="mc-ovr">88</span><span class="mc-name">Salah</span></div></div>
+                <div class="gp-slot filled"><div class="mini-card silver"><span class="mc-ovr">82</span><span class="mc-name">Havertz</span></div></div>
+                <div class="gp-slot filled"><div class="mini-card elite"><span class="mc-ovr">91</span><span class="mc-name">Haaland</span></div></div>
+                <div class="gp-slot filled"><div class="mini-card silver"><span class="mc-ovr">79</span><span class="mc-name">Saka</span></div></div>
+                <div class="gp-slot filled"><div class="mini-card silver"><span class="mc-ovr">81</span><span class="mc-name">Rodri</span></div></div>
+                <div class="gp-slot filled"><div class="mini-card bronze"><span class="mc-ovr">68</span><span class="mc-name">Tufan</span></div></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+              </div>
+            </div>
+            <div class="gp-team">
+              <div class="gp-team-name">Kartallar <span class="ovr">621</span></div>
+              <div class="gp-field">
+                <div class="gp-slot filled"><div class="mini-card silver"><span class="mc-ovr">84</span><span class="mc-name">Foden</span></div></div>
+                <div class="gp-slot filled"><div class="mini-card silver"><span class="mc-ovr">78</span><span class="mc-name">Icardi</span></div></div>
+                <div class="gp-slot filled"><div class="mini-card gold"><span class="mc-ovr">86</span><span class="mc-name">Saliba</span></div></div>
+                <div class="gp-slot filled"><div class="mini-card bronze"><span class="mc-ovr">65</span><span class="mc-name">Erkin</span></div></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+              </div>
+            </div>
+            <div class="gp-team">
+              <div class="gp-team-name">Yildizlar <span class="ovr">512</span></div>
+              <div class="gp-field">
+                <div class="gp-slot filled"><div class="mini-card gold"><span class="mc-ovr">87</span><span class="mc-name">Kimmich</span></div></div>
+                <div class="gp-slot filled"><div class="mini-card silver"><span class="mc-ovr">76</span><span class="mc-name">Tosun</span></div></div>
+                <div class="gp-slot filled"><div class="mini-card silver"><span class="mc-ovr">80</span><span class="mc-name">Dzeko</span></div></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+              </div>
+            </div>
+            <div class="gp-team">
+              <div class="gp-team-name">Bogaziciler <span class="ovr">398</span></div>
+              <div class="gp-field">
+                <div class="gp-slot filled"><div class="mini-card elite"><span class="mc-ovr">91</span><span class="mc-name">Kane</span></div></div>
+                <div class="gp-slot filled"><div class="mini-card silver"><span class="mc-ovr">77</span><span class="mc-name">Saiss</span></div></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+                <div class="gp-slot empty"></div>
+              </div>
+            </div>
+          </div>
+          <div class="gp-notif">
+            <svg style="width:14px;height:14px;vertical-align:middle;margin-right:6px;color:var(--success)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <strong>@futbolkral</strong> begeni hedefine ulasti — Bronz kart hakki kazandi!
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- Ozellikler -->
-  <section class="features">
-    <h2 class="features-title">Neden Kadro Kur?</h2>
-    <p class="features-sub">Canli yayininizi interaktif bir futbol deneyimine donusturen tek platform</p>
-    <div class="features-grid">
-      <div class="feature-card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-        <h3>FIFA Tarzi Kartlar</h3>
-        <p>522 gercek futbolcu, 6 buyuk lig. Bronz, gumus, altin ve elit seviye kartlarla gercekci bir deneyim.</p>
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features-header">
+        <div class="section-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Ozellikler</div>
+        <h2>Her Yayinciya Ozel Deneyim</h2>
+        <p>Yayinlarinizi unutulmaz bir interaktif gosteriye donusturun</p>
       </div>
-      <div class="feature-card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
-        <h3>TikTok Entegrasyonu</h3>
-        <p>Canli yayindaki begeniler ve hediyeler aninda kart acma hakkina donusur. Sifir gecikme.</p>
-      </div>
-      <div class="feature-card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <h3>4 Takim Yarisi</h3>
-        <p>Izleyiciler takimlara kart dagitir. En yuksek puana sahip kadroyu kuran takim kazanir!</p>
-      </div>
-      <div class="feature-card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <h3>Sinematik Animasyonlar</h3>
-        <p>Kart acilislarinda 3D flip, pariltili efektler ve seviyeye ozel gorseller. Yayininizi canlandirir.</p>
-      </div>
-      <div class="feature-card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        <h3>OBS Uyumlu</h3>
-        <p>Seffaf arkaplanli oyun ekrani. Browser Source olarak OBS veya TikTok Studio'ya kolayca ekleyin.</p>
-      </div>
-      <div class="feature-card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-        <h3>Lisans Sistemi</h3>
-        <p>Coklu yayinci destegi, plan bazli ozellikler, admin paneli ile tam kontrol.</p>
+      <div class="features-grid">
+        <div class="feat">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+          <h3>522+ Gercek Futbolcu</h3>
+          <p>6 buyuk Avrupa liginden gercek oyuncular. FIFA tarzi istatistikler ve seviye sistemi.</p>
+        </div>
+        <div class="feat">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <h3>Sifir Gecikme</h3>
+          <p>TikTok canli yayin verileri aninda islenir. Begeniler, hediyeler ve yorumlar gerceK zamanli akar.</p>
+        </div>
+        <div class="feat">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <h3>4 Takim Yarisi</h3>
+          <p>Izleyiciler takimlara kart dagitir. En yuksek kadro puanini toplayan takim kazanir.</p>
+        </div>
+        <div class="feat">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <h3>Sinematik Kart Acilisi</h3>
+          <p>3D flip animasyonu, pariltili efektler, ekran titremesi. Her kart acilisi bir gosteri.</p>
+        </div>
+        <div class="feat">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <h3>OBS / TikTok Studio</h3>
+          <p>Seffaf arkaplanli 1920x1080 overlay. Browser Source olarak kolayca ekleyin.</p>
+        </div>
+        <div class="feat">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <h3>Tam Kontrol Paneli</h3>
+          <p>Takim ayarlari, formasyon secimi, lig filtreleri, kart dagitim kuyrugu. Her sey sizin elinizde.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Nasil Calisir -->
-  <section class="how-it-works">
-    <div class="how-inner">
-      <h2 class="how-title">Nasil Calisir?</h2>
+  <!-- HOW -->
+  <section class="how" id="how">
+    <div class="container">
+      <div class="how-header">
+        <div class="section-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Nasil Calisir</div>
+        <h2>4 Adimda Yayina Baslayin</h2>
+      </div>
       <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div>
-            <h3>Lisans Anahtarinizi Girin</h3>
-            <p>Yayin paneline giris yapin. Lisans anahtariniz yoksa Telegram uzerinden bizimle iletisime gecin.</p>
-          </div>
+        <div class="step"><div class="step-n">1</div><div><h3>Lisans Anahtarinizi Girin</h3><p>Yayin panelini acin ve lisans anahtarinizi girin. Anahtariniz yoksa Telegram uzerinden bize ulasin.</p></div></div>
+        <div class="step"><div class="step-n">2</div><div><h3>Takimlari Olusturun</h3><p>4 takima isim verin, renk ve formasyon secin. Begeni hedefini ve lig filtrelerini ayarlayin.</p></div></div>
+        <div class="step"><div class="step-n">3</div><div><h3>TikTok Hesabinizi Baglayin</h3><p>TikTok kullanici adinizi girin. Canli yayin verileri aninda panel'e akmaya baslar.</p></div></div>
+        <div class="step"><div class="step-n">4</div><div><h3>OBS'ye Ekleyin, Oyunu Baslatin</h3><p>Oyun URL'sini OBS'de Browser Source olarak ekleyin. Izleyiciler begeni ve hediye gonderdikce kart haklari olusur!</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIERS -->
+  <section class="tiers" id="tiers">
+    <div class="container">
+      <div class="tiers-header">
+        <div class="section-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8m-4-4h8"/></svg>Kart Seviyeleri</div>
+        <h2>Hediye Degerine Gore Kartlar</h2>
+        <p>Daha buyuk hediyeler, daha guclu oyuncular</p>
+      </div>
+      <div class="tiers-grid">
+        <div class="tier bronze">
+          <div class="tier-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12h6M12 9v6"/></svg></div>
+          <h3>BRONZ</h3><div class="range">50 — 70 OVR</div><div class="trigger">Begeni hedefine ulasinca</div>
         </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div>
-            <h3>Takimlari ve Ayarlari Belirleyin</h3>
-            <p>4 takima isim verin, formasyonlari secin, begeni hedefini ve lig filtrelerini ayarlayin.</p>
-          </div>
+        <div class="tier silver">
+          <div class="tier-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="3"/><polygon points="12 8 13.5 11 17 11.3 14.5 13.5 15.2 17 12 15 8.8 17 9.5 13.5 7 11.3 10.5 11"/></svg></div>
+          <h3>GUMUS</h3><div class="range">71 — 84 OVR</div><div class="trigger">20+ jeton degerinde hediye</div>
         </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div>
-            <h3>TikTok Yayinina Baglanin</h3>
-            <p>TikTok kullanici adinizi girin ve baglanti butonuna basin. Canli yayin verileri aninda akmaya baslar.</p>
-          </div>
+        <div class="tier gold">
+          <div class="tier-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="3"/><polygon points="12 7 14.5 11.5 19 12 15.5 15 16.5 19.5 12 17 7.5 19.5 8.5 15 5 12 9.5 11.5"/></svg></div>
+          <h3>ALTIN</h3><div class="range">85 — 90 OVR</div><div class="trigger">50+ jeton degerinde hediye</div>
         </div>
-        <div class="step">
-          <div class="step-num">4</div>
-          <div>
-            <h3>OBS'ye Ekleyin ve Oyunu Baslatin</h3>
-            <p>Oyun URL'sini OBS'de Browser Source olarak ekleyin. Izleyiciler begeni atip hediye gonderdikce kart haklari olusur!</p>
-          </div>
+        <div class="tier elite">
+          <div class="tier-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3h12l4 8-10 13L2 11z"/><path d="M2 11h20"/><path d="M6 3l6 8 6-8"/></svg></div>
+          <h3>ELIT</h3><div class="range">91 — 99 OVR</div><div class="trigger">100+ jeton degerinde hediye</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Kart Seviyeleri -->
-  <section class="tiers">
-    <h2 class="tiers-title">Kart Seviyeleri</h2>
-    <p class="tiers-sub">Hediye degerine gore farkli seviye kartlar acilir</p>
-    <div class="tiers-grid">
-      <div class="tier-card bronze">
-        <div class="tier-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg></div>
-        <h3>BRONZ</h3>
-        <div class="tier-range">50 - 70 OVR</div>
-        <div class="tier-trigger">Begeni hedefine ulastiginda</div>
-      </div>
-      <div class="tier-card silver">
-        <div class="tier-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><polygon points="12 8 14 11 17 11.5 15 13.5 15.5 17 12 15 8.5 17 9 13.5 7 11.5 10 11 12 8"/></svg></div>
-        <h3>GUMUS</h3>
-        <div class="tier-range">71 - 84 OVR</div>
-        <div class="tier-trigger">20 jetonluk hediye</div>
-      </div>
-      <div class="tier-card gold">
-        <div class="tier-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><polygon points="12 7 14.5 11 19 11.5 16 14.5 16.5 19 12 16.5 7.5 19 8 14.5 5 11.5 9.5 11 12 7"/></svg></div>
-        <h3>ALTIN</h3>
-        <div class="tier-range">85 - 90 OVR</div>
-        <div class="tier-trigger">50 jetonluk hediye</div>
-      </div>
-      <div class="tier-card elite">
-        <div class="tier-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3h12l4 8-10 13L2 11z"/><path d="M2 11h20"/><path d="M6 3l6 8 6-8"/></svg></div>
-        <h3>ELIT</h3>
-        <div class="tier-range">91 - 99 OVR</div>
-        <div class="tier-trigger">100+ jetonluk hediye</div>
+  <!-- STATS -->
+  <section class="stats">
+    <div class="container">
+      <div class="stats-inner">
+        <div><div class="stat-num c1">522+</div><div class="stat-label">Futbolcu</div></div>
+        <div><div class="stat-num c2">6</div><div class="stat-label">Avrupa Ligi</div></div>
+        <div><div class="stat-num c3">11</div><div class="stat-label">Pozisyon</div></div>
+        <div><div class="stat-num c4">6</div><div class="stat-label">Formasyon</div></div>
       </div>
     </div>
   </section>
 
-  <!-- Istatistikler -->
-  <section class="stats-section">
-    <div class="stats-inner">
-      <div><div class="stat-big c1">522+</div><div class="stat-desc">Gercek Futbolcu</div></div>
-      <div><div class="stat-big c2">6</div><div class="stat-desc">Buyuk Avrupa Ligi</div></div>
-      <div><div class="stat-big c3">4</div><div class="stat-desc">Takim Yarisi</div></div>
-      <div><div class="stat-big c4">0ms</div><div class="stat-desc">Gecikme Suresi</div></div>
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <div class="pricing-header">
+        <div class="section-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Fiyatlar</div>
+        <h2>Size Uygun Plani Secin</h2>
+        <p>Her yayinci icin uygun fiyat secenekleri</p>
+      </div>
+      <div class="pricing-grid">
+        <!-- Basic -->
+        <div class="price-card">
+          <div class="price-plan">Baslangic</div>
+          <div class="price-amount">149 TL</div>
+          <div class="price-period">aylik</div>
+          <ul class="price-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>1 es zamanli yayin</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Tum ligler ve oyuncular</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Kart animasyonlari</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Ses efektleri</li>
+            <li class="disabled"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Ozel kart tasarimi</li>
+            <li class="disabled"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Oncelikli destek</li>
+          </ul>
+          <a href="https://t.me/luanamobile" target="_blank" class="price-btn price-btn-outline">Satin Al</a>
+        </div>
+        <!-- Pro -->
+        <div class="price-card popular">
+          <div class="popular-tag">Populer</div>
+          <div class="price-plan">Profesyonel</div>
+          <div class="price-amount">349 TL</div>
+          <div class="price-period">aylik</div>
+          <ul class="price-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>3 es zamanli yayin</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Tum ligler ve oyuncular</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Kart animasyonlari</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Ses efektleri</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Ozel kart tasarimi</li>
+            <li class="disabled"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Oncelikli destek</li>
+          </ul>
+          <a href="https://t.me/luanamobile" target="_blank" class="price-btn price-btn-fill">Satin Al</a>
+        </div>
+        <!-- Premium -->
+        <div class="price-card">
+          <div class="price-plan">Premium</div>
+          <div class="price-amount">699 TL</div>
+          <div class="price-period">aylik</div>
+          <ul class="price-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>5 es zamanli yayin</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Tum ligler ve oyuncular</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Kart animasyonlari</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Ses efektleri</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Ozel kart tasarimi</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Oncelikli destek</li>
+          </ul>
+          <a href="https://t.me/luanamobile" target="_blank" class="price-btn price-btn-gold">Satin Al</a>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- CTA -->
   <section class="cta">
-    <h2>Yayininizi Bir Ust Seviyeye Tasiyin</h2>
-    <p>Kadro Kur ile izleyicilerinizi aktif katilimcilara donusturun. Hemen baslayabilirsiniz.</p>
+    <h2>Yayininizi Donusturmeye Hazir misiniz?</h2>
+    <p>Izleyicilerinizi pasif seyircilerden aktif oyunculara donusturun. Ilk yayinda fark goreceksiniz.</p>
     <div class="cta-actions">
-      <a href="/panel" class="btn-hero btn-hero-primary">
-        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Yayin Paneline Git
-      </a>
-      <a href="https://t.me/luanamobile" target="_blank" class="btn-hero btn-hero-secondary">
-        <svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-        Telegram ile Iletisim
-      </a>
+      <a href="/panel" class="btn btn-primary"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Hemen Baslayalim</a>
+      <a href="https://t.me/luanamobile" target="_blank" class="btn btn-ghost"><svg class="icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>Telegram ile Iletisim</a>
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- FOOTER -->
   <footer>
-    <div class="footer-links">
-      <a href="/panel">Yayin Paneli</a>
-      <a href="/licensepanel">Yonetim Paneli</a>
-      <a href="https://t.me/luanamobile" target="_blank">Telegram: @luanamobile</a>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">KADRO KUR</div>
+        <div class="footer-links">
+          <a href="/panel">Yayin Paneli</a>
+          <a href="#pricing">Fiyatlar</a>
+          <a href="https://t.me/luanamobile" target="_blank">Telegram: @luanamobile</a>
+        </div>
+      </div>
+      <div class="footer-copy">2026 Kadro Kur. Tum haklari saklidir.</div>
     </div>
-    <p>&copy; 2026 Kadro Kur. Tum haklari saklidir.</p>
   </footer>
 
+  <script>
+    // Nav scroll effect
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 40);
+    });
+  </script>
 </body>
 </html>
