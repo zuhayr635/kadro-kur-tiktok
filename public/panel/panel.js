@@ -106,7 +106,7 @@
     try {
       const res = await fetch(path, opts);
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || data.message || 'API error');
+      if (!res.ok) throw new Error(data.error?.message || data.message || (typeof data.error === 'string' ? data.error : 'API hatasi'));
       return data;
     } catch (err) {
       console.error('API Error:', method, path, err);
@@ -163,8 +163,11 @@
   // ---- After Login: Create Session & Socket ----
   async function afterLogin() {
     try {
-      const data = await api('POST', '/api/sessions/create', {});
-      state.sessionId = data.session_id || data.sessionId || data.id;
+      const data = await api('POST', '/api/sessions/create', {
+        license_key: state.licenseKey,
+        tiktok_username: state.licenseInfo?.data?.owner_tiktok || state.licenseInfo?.owner_tiktok || 'unknown'
+      });
+      state.sessionId = data.data?.session_id || data.session_id || data.sessionId || data.id;
       const origin = window.location.origin;
       const obsUrl = origin + '/game?session=' + state.sessionId;
       $('#obs-url').textContent = obsUrl;
@@ -906,7 +909,9 @@
 
   async function loadProfile() {
     try {
-      const data = await api('GET', '/api/profile', null);
+      const licId = state.licenseInfo?.data?.id || state.licenseInfo?.id;
+      if (!licId) return;
+      const data = await api('GET', '/api/profile/' + licId, null);
       if (data.games && Array.isArray(data.games)) {
         renderPastGames(data.games);
       }
