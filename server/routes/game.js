@@ -58,6 +58,7 @@ router.post('/:session_id/settings', (req, res) => {
 });
 
 // POST /api/game/:session_id/team - Update team settings
+// Accepts either { teams: [...] } or single team { name, color, formation }
 router.post('/:session_id/team', (req, res) => {
   try {
     const session = sm.getSession(req.params.session_id);
@@ -65,13 +66,70 @@ router.post('/:session_id/team', (req, res) => {
       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Session bulunamadi' } });
     }
 
-    const { teams } = req.body;
-    if (!teams || !Array.isArray(teams)) {
-      return res.status(400).json({ success: false, error: { code: 'INVALID_DATA', message: 'teams bir dizi olmalidir' } });
+    const { teams, name, color, formation } = req.body;
+
+    if (teams && Array.isArray(teams)) {
+      // Bulk update: { teams: [{name, color, formation}, ...] }
+      const updated = sm.updateTeamSettings(req.params.session_id, { teams });
+      return res.json({ success: true, data: updated });
     }
 
-    const updated = sm.updateTeamSettings(req.params.session_id, { teams });
-    res.json({ success: true, data: updated });
+    if (name || color || formation) {
+      // Single team update - merge into existing settings
+      const existing = typeof session.team_settings === 'string' ? JSON.parse(session.team_settings || '{}') : (session.team_settings || {});
+      if (!existing.teams) existing.teams = [{}, {}, {}, {}];
+      // Find first team without a name or append
+      const teamData = { name: name || undefined, color: color || undefined, formation: formation || undefined };
+      // For single updates, update the team settings directly
+      const updated = sm.updateTeamSettings(req.params.session_id, { ...existing, singleUpdate: teamData });
+      return res.json({ success: true, data: updated });
+    }
+
+    res.status(400).json({ success: false, error: { code: 'INVALID_DATA', message: 'teams dizisi veya name/color/formation gerekli' } });
+  } catch (e) {
+    res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: e.message } });
+  }
+});
+
+// POST /api/game/:session_id/start - Start game
+router.post('/:session_id/start', (req, res) => {
+  try {
+    const session = sm.getSession(req.params.session_id);
+    if (!session) {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Session bulunamadi' } });
+    }
+
+    // Auto-init if needed
+    let gameState;
+    try { gameState = JSON.parse(session.game_state || '{}'); } catch (_) { gameState = {}; }
+    if (!gameState.teams) {
+      const teamSettings = typeof session.team_settings === 'string' ? JSON.parse(session.team_settings || '{}') : (session.team_settings || {});
+      gameState = ge.initGameState(teamSettings);
+    }
+    gameState.status = 'running';
+    gameState.startedAt = gameState.startedAt || new Date().toISOString();
+    sm.updateGameState(req.params.session_id, gameState);
+
+    res.json({ success: true, data: { status: 'running', gameState } });
+  } catch (e) {
+    res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: e.message } });
+  }
+});
+
+// POST /api/game/:session_id/pause - Pause/resume game
+router.post('/:session_id/pause', (req, res) => {
+  try {
+    const session = sm.getSession(req.params.session_id);
+    if (!session) {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Session bulunamadi' } });
+    }
+
+    let gameState;
+    try { gameState = JSON.parse(session.game_state || '{}'); } catch (_) { gameState = {}; }
+    gameState.status = gameState.status === 'paused' ? 'running' : 'paused';
+    sm.updateGameState(req.params.session_id, gameState);
+
+    res.json({ success: true, data: { status: gameState.status } });
   } catch (e) {
     res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: e.message } });
   }
@@ -153,6 +211,15 @@ router.post('/:session_id/end', (req, res) => {
     const session = sm.getSession(req.params.session_id);
     if (!session) {
       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Session bulunamadi' } });
+    }
+
+    // Auto-init if game not started
+    let gameState;
+    try { gameState = JSON.parse(session.game_state || '{}'); } catch (_) { gameState = {}; }
+    if (!gameState.teams) {
+      const teamSettings = typeof session.team_settings === 'string' ? JSON.parse(session.team_settings || '{}') : (session.team_settings || {});
+      const initState = ge.initGameState(teamSettings);
+      sm.updateGameState(req.params.session_id, initState);
     }
 
     const result = ge.endGame(req.params.session_id);
