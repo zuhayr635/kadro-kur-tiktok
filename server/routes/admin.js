@@ -48,7 +48,10 @@ router.post('/change-password', authMiddleware, async (req, res) => {
   }
   const hash = await hashPassword(newPassword);
   getDb().prepare('UPDATE admin SET password_hash=? WHERE id=?').run(hash, admin.id);
-  res.json({ success: true, data: { message: 'Sifre guncellendi' } });
+  if (req.body.newUsername) {
+    getDb().prepare('UPDATE admin SET username=? WHERE id=?').run(req.body.newUsername, admin.id);
+  }
+  res.json({ success: true, data: { message: 'Bilgiler guncellendi' } });
 });
 
 // GET/PUT /api/admin/settings
