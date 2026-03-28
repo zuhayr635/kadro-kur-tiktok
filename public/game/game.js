@@ -133,6 +133,40 @@
     socket.on('game-ended', handleGameEnded);
     socket.on('settings-changed', handleSettingsChanged);
     socket.on('game-state', handleGameState);
+    // Also handle these server-emitted events
+    socket.on('game-state-updated', function (data) {
+      if (data && data.gameState) {
+        gameState = data.gameState;
+        renderTeams(gameState);
+      }
+    });
+    socket.on('card-assigned', function (data) {
+      if (data && data.gameState) {
+        gameState = data.gameState;
+        renderTeams(gameState);
+      }
+      if (data && data.result) {
+        handleCardResult(data.result);
+        if (data.result.player && data.result.action !== 'rejected') {
+          playCardAnimation(data.result.player, data.result.player.tier || 'bronze', data.result.team ? data.result.team.index : 0, data.result.position);
+        }
+      }
+    });
+    socket.on('session-state', function (data) {
+      if (data && data.gameState) {
+        gameState = data.gameState;
+        if (data.teamSettings && data.teamSettings.teams && gameState.teams) {
+          data.teamSettings.teams.forEach(function (ts, i) {
+            if (gameState.teams[i] && ts) {
+              if (ts.name) gameState.teams[i].name = ts.name;
+              if (ts.color) gameState.teams[i].color = ts.color;
+              if (ts.formation) gameState.teams[i].formation = ts.formation;
+            }
+          });
+        }
+        renderTeams(gameState);
+      }
+    });
   }
 
   // ---------------------------------------------------------------
@@ -143,7 +177,19 @@
       const res = await fetch('/api/game/' + sessionId);
       if (!res.ok) throw new Error('Failed to fetch game state');
       const data = await res.json();
-      gameState = data;
+      // API returns { success: true, data: { game_state, team_settings, ... } }
+      const apiData = data.data || data;
+      gameState = apiData.game_state || apiData;
+      // Merge team names/colors/formations from team_settings into game_state teams
+      if (apiData.team_settings && apiData.team_settings.teams && gameState.teams) {
+        apiData.team_settings.teams.forEach(function (ts, i) {
+          if (gameState.teams[i] && ts) {
+            if (ts.name) gameState.teams[i].name = ts.name;
+            if (ts.color) gameState.teams[i].color = ts.color;
+            if (ts.formation) gameState.teams[i].formation = ts.formation;
+          }
+        });
+      }
       renderTeams(gameState);
     } catch (err) {
       console.error('[KadroKur] Error fetching game state:', err);
@@ -155,7 +201,21 @@
   // SOCKET HANDLERS
   // ---------------------------------------------------------------
   function handleGameState(data) {
-    gameState = data;
+    // data may be raw game_state or wrapped { gameState, teamSettings }
+    if (data && data.gameState) {
+      gameState = data.gameState;
+      if (data.teamSettings && data.teamSettings.teams && gameState.teams) {
+        data.teamSettings.teams.forEach(function (ts, i) {
+          if (gameState.teams[i] && ts) {
+            if (ts.name) gameState.teams[i].name = ts.name;
+            if (ts.color) gameState.teams[i].color = ts.color;
+            if (ts.formation) gameState.teams[i].formation = ts.formation;
+          }
+        });
+      }
+    } else {
+      gameState = data;
+    }
     renderTeams(gameState);
   }
 

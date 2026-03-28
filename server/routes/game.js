@@ -1,10 +1,13 @@
 'use strict';
 
 const express = require('express');
-const router = express.Router();
 const { getDb } = require('../database');
 const sm = require('../session-manager');
 const ge = require('../game-engine');
+
+// Factory: accepts io so routes can emit socket events
+module.exports = function createGameRouter(io) {
+const router = express.Router();
 
 // GET /api/game/:session_id - Get game state
 router.get('/:session_id', (req, res) => {
@@ -180,6 +183,24 @@ router.post('/:session_id/draw', (req, res) => {
       return res.status(404).json({ success: false, error: { code: 'NO_CARD', message: 'Uygun oyuncu bulunamadi' } });
     }
 
+    // Emit socket events so overlay and panel update in real-time
+    const sessionId = req.params.session_id;
+    const updatedSession = sm.getSession(sessionId);
+    const updatedGameState = updatedSession ? JSON.parse(updatedSession.game_state || '{}') : {};
+    if (io) {
+      io.to('session_' + sessionId).emit('card-result', {
+        action: result.action,
+        player: result.player,
+        oldPlayer: result.oldPlayer,
+        teamIndex: result.team ? result.team.index : team_index,
+        position: result.position,
+      });
+      io.to('session_' + sessionId).emit('game-state-updated', {
+        sessionId,
+        gameState: updatedGameState,
+      });
+    }
+
     res.json({ success: true, data: result });
   } catch (e) {
     res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: e.message } });
@@ -247,4 +268,5 @@ router.get('/:session_id/queue', (req, res) => {
   }
 });
 
-module.exports = router;
+return router;
+}; // end createGameRouter

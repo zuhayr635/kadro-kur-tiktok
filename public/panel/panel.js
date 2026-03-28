@@ -27,6 +27,7 @@
     totalCards: 0,
     totalViewers: 0,
     bestOvr: 0,
+    autoRoundRobin: 0,
   };
 
   const FORMATIONS = ['4-3-3', '4-4-2', '3-5-2', '4-2-3-1', '3-4-3', '5-3-2'];
@@ -196,6 +197,8 @@
               })
               .catch(function () {})
               .finally(function () {
+                const obsUrl = window.location.origin + '/game?session=' + savedSession;
+                $('#obs-url').textContent = obsUrl;
                 connectSocket();
                 buildTeamCards();
                 buildTeamButtons();
@@ -271,7 +274,7 @@
     });
 
     socket.on('new-request', function (data) {
-      addRequest(data);
+      autoAssignRequest(data);
     });
 
     socket.on('like-update', function (data) {
@@ -598,6 +601,32 @@
     });
   }
 
+  async function autoAssignRequest(data) {
+    if (!state.sessionId || state.gameStatus === 'idle' || state.gameStatus === 'ended') {
+      addRequest(data);
+      return;
+    }
+    try {
+      const teamIndex = state.autoRoundRobin % state.teams.length;
+      state.autoRoundRobin++;
+      const result = await api('POST', '/api/game/' + state.sessionId + '/draw', {
+        team_index: teamIndex,
+        tier: data.tier || 'bronze',
+        username: data.username,
+      });
+      const r = result.data || result;
+      addLog((data.username || '?') + ' -> ' + state.teams[teamIndex].name + (r.player ? ' (' + r.player.name + ' ' + (r.player.overall || r.player.ovr) + ')' : ''));
+      showCardResult(r);
+      state.totalCards++;
+      if (r.player && (r.player.overall || r.player.ovr) > state.bestOvr) {
+        state.bestOvr = r.player.overall || r.player.ovr;
+      }
+    } catch (err) {
+      addLog('Oto-atama hatasi: ' + err.message);
+      addRequest(data);
+    }
+  }
+
   function addRequest(data) {
     state.requestQueue.push(data);
     renderQueue();
@@ -680,8 +709,8 @@
         $('#remaining-count').textContent = data.remaining;
       }
 
-      showCardResult(data);
-      addLog(req.username + ' -> ' + state.teams[teamIndex].name + (data.player ? ' (' + data.player.name + ' ' + data.player.ovr + ')' : ''));
+      showCardResult(data.data || data);
+      addLog(req.username + ' -> ' + state.teams[teamIndex].name + ((data.data || data).player ? ' (' + (data.data || data).player.name + ' ' + ((data.data || data).player.overall || (data.data || data).player.ovr) + ')' : ''));
     } catch (err) {
       addLog('Kart atama hatasi: ' + err.message);
     }
