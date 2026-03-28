@@ -31,6 +31,12 @@
 
   const FORMATIONS = ['4-3-3', '4-4-2', '3-5-2', '4-2-3-1', '3-4-3', '5-3-2'];
   const TIER_NAMES = ['Bronz', 'Gumus', 'Altin', 'Elmas'];
+  const TIER_STR_MAP = { bronze: 0, silver: 1, gold: 2, elite: 3 };
+
+  function tierIndex(tier) {
+    if (typeof tier === 'number') return Math.max(0, Math.min(3, tier - 1));
+    return TIER_STR_MAP[tier] !== undefined ? TIER_STR_MAP[tier] : 0;
+  }
 
   // Formation position maps (percentage-based x,y on mini pitch)
   const FORMATION_POSITIONS = {
@@ -146,6 +152,7 @@
         const data = await api('POST', '/api/license/validate', { license_key: key });
         state.licenseKey = key;
         state.licenseInfo = data;
+        localStorage.setItem('kk_license', key);
         hide('#login-screen');
         show('#main-panel');
         afterLogin();
@@ -158,6 +165,53 @@
           '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Giris Yap';
       }
     });
+
+    // Auto-login if saved license key exists
+    const savedKey = localStorage.getItem('kk_license');
+    if (savedKey) {
+      input.value = savedKey;
+      api('POST', '/api/license/validate', { license_key: savedKey })
+        .then(function (data) {
+          state.licenseKey = savedKey;
+          state.licenseInfo = data;
+          hide('#login-screen');
+          show('#main-panel');
+          // Restore saved session if still active
+          const savedSession = localStorage.getItem('kk_session');
+          if (savedSession) {
+            state.sessionId = savedSession;
+            // Restore team and game settings from server
+            api('GET', '/api/game/' + savedSession)
+              .then(function (gameData) {
+                const ts = gameData.data?.team_settings;
+                if (ts && ts.teams && Array.isArray(ts.teams)) {
+                  ts.teams.forEach(function (t, i) {
+                    if (state.teams[i]) {
+                      if (t.name) state.teams[i].name = t.name;
+                      if (t.color) state.teams[i].color = t.color;
+                      if (t.formation) state.teams[i].formation = t.formation;
+                    }
+                  });
+                }
+              })
+              .catch(function () {})
+              .finally(function () {
+                connectSocket();
+                buildTeamCards();
+                buildTeamButtons();
+                buildFormations();
+                setSessionStatus(true);
+                addLog('Oturum geri yuklendi: ' + savedSession);
+              });
+          } else {
+            afterLogin();
+          }
+        })
+        .catch(function () {
+          localStorage.removeItem('kk_license');
+          localStorage.removeItem('kk_session');
+        });
+    }
   }
 
   // ---- After Login: Create Session & Socket ----
@@ -168,6 +222,7 @@
         tiktok_username: state.licenseInfo?.data?.owner_tiktok || state.licenseInfo?.owner_tiktok || 'unknown'
       });
       state.sessionId = data.data?.session_id || data.session_id || data.sessionId || data.id;
+      localStorage.setItem('kk_session', state.sessionId);
       const origin = window.location.origin;
       const obsUrl = origin + '/game?session=' + state.sessionId;
       $('#obs-url').textContent = obsUrl;
@@ -194,6 +249,22 @@
       addLog('Sunucuya baglandi.');
     });
 
+    socket.on('session-state', function (data) {
+      const ts = data.teamSettings;
+      if (ts && ts.teams && Array.isArray(ts.teams)) {
+        ts.teams.forEach(function (t, i) {
+          if (state.teams[i]) {
+            if (t.name) state.teams[i].name = t.name;
+            if (t.color) state.teams[i].color = t.color;
+            if (t.formation) state.teams[i].formation = t.formation;
+          }
+        });
+        buildTeamCards();
+        buildTeamButtons();
+        buildFormations();
+      }
+    });
+
     socket.on('disconnect', function () {
       setSessionStatus(false);
       addLog('Sunucu baglantisi kesildi.');
@@ -204,7 +275,13 @@
     });
 
     socket.on('like-update', function (data) {
-      state.totalLikes = data.total || state.totalLikes;
+      state.totalLikes = (state.totalLikes || 0) + (data.likeCount || 1);
+      var likeEl = $('#stat-total-likes');
+      if (likeEl) {
+        likeEl.textContent = data.threshold
+          ? (data.total || 0) + '/' + data.threshold
+          : state.totalLikes;
+      }
     });
 
     socket.on('tiktok-status', function (data) {
@@ -360,15 +437,10 @@
   async function saveTeams() {
     if (!state.sessionId) return;
     try {
-      for (let i = 0; i < state.teams.length; i++) {
-        const t = state.teams[i];
-        const fd = new FormData();
-        fd.append('name', t.name);
-        fd.append('color', t.color);
-        fd.append('formation', t.formation);
-        if (t.emblemFile) fd.append('emblem', t.emblemFile);
-        await api('POST', '/api/game/' + state.sessionId + '/team', fd);
-      }
+      const teams = state.teams.map(function (t) {
+        return { name: t.name, color: t.color, formation: t.formation };
+      });
+      await api('POST', '/api/game/' + state.sessionId + '/team', { teams: teams });
       addLog('Takim ayarlari kaydedildi.');
       buildTeamButtons();
       buildFormations();
@@ -543,9 +615,10 @@
     state.requestQueue.forEach(function (req, i) {
       const item = document.createElement('div');
       item.className = 'queue-item' + (state.selectedRequest === i ? ' selected' : '');
-      const tierClass = 'tier-badge tier-badge-' + (req.tier || 1);
+      const ti = tierIndex(req.tier);
+      const tierClass = 'tier-badge tier-badge-' + (ti + 1);
       item.innerHTML =
-        '<span class="' + tierClass + '">' + TIER_NAMES[(req.tier || 1) - 1] + '</span>' +
+        '<span class="' + tierClass + '">' + TIER_NAMES[ti] + '</span>' +
         '<span class="queue-item-user">' + escHtml(req.username || 'Anonim') + '</span>' +
         '<span class="queue-item-comment">' + escHtml(req.comment || '') + '</span>';
       item.addEventListener('click', function () {

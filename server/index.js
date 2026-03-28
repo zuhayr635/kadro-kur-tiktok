@@ -94,6 +94,9 @@ spaPages.forEach((page) => {
   });
 });
 
+// Per-session like accumulation: sessionId -> accumulated like count
+const sessionLikeCounts = new Map();
+
 // ---------------------------------------------------------------------------
 // Socket.io  --  session rooms and panel commands
 // ---------------------------------------------------------------------------
@@ -252,7 +255,37 @@ io.on('connection', (socket) => {
         }
         // Forward likes/gifts as panel events
         if (event.type === 'like') {
-          io.to(`session_${sessionId}`).emit('like-update', { total: event.data?.likes || 1, user: event.data });
+          // Accumulate likes and check threshold
+          const likeCount = event.data?.likeCount || event.data?.likes || 1;
+          const current = (sessionLikeCounts.get(sessionId) || 0) + likeCount;
+
+          // Get like threshold from game settings
+          let threshold = 50;
+          try {
+            const sess = getSession(sessionId);
+            if (sess) {
+              const gs = JSON.parse(sess.game_settings || '{}');
+              threshold = gs.like_threshold || gs.likeThreshold || 50;
+            }
+          } catch (_) {}
+
+          if (current >= threshold) {
+            sessionLikeCounts.set(sessionId, current % threshold);
+            io.to(`session_${sessionId}`).emit('new-request', {
+              username: event.data?.nickname || event.data?.uniqueId || 'TikTok',
+              tier: 'bronze',
+              type: 'like',
+              data: event.data,
+            });
+          } else {
+            sessionLikeCounts.set(sessionId, current);
+          }
+
+          io.to(`session_${sessionId}`).emit('like-update', {
+            total: current,
+            threshold,
+            user: event.data,
+          });
         }
         if (event.type === 'gift') {
           io.to(`session_${sessionId}`).emit('new-request', {
